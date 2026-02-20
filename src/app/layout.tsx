@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'VULNIX`26 | DSCET CyberSecurity', // Updated title
+  title: 'VULNIX`26 | CYZOR & CYBEXA', // Updated title
   description: 'VULNIX - College Symposium on Cybersecurity Awareness',
   icons: [
     // Reference the local icon file expected to be in the src/app directory
