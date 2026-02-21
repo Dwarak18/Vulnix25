@@ -2,15 +2,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import images from '@/lib/placeholder-images.json';
 import { cn } from '@/lib/utils';
 import AnimatedGridPattern from '../common/AnimatedGridPattern';
 
 const GallerySection = () => {
   const [index, setIndex] = useState(0);
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<{src: string; alt: string} | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const totalImages = images.length;
@@ -88,7 +88,7 @@ const GallerySection = () => {
             >
               <div 
                 className="w-full h-full cursor-pointer group"
-                onClick={() => setFullscreenImage(images[index].src)}
+                onClick={() => setFullscreenImage({ src: images[index].src, alt: images[index].alt })}
               >
                 <Image
                   src={images[index].src}
@@ -129,9 +129,11 @@ const GallerySection = () => {
       
       <Dialog open={!!fullscreenImage} onOpenChange={() => setFullscreenImage(null)}>
         <DialogContent className="max-w-5xl w-full p-0 bg-transparent border-0">
+          <DialogTitle className="sr-only">{fullscreenImage?.alt}</DialogTitle>
+          <DialogDescription className="sr-only">A larger view of the image: {fullscreenImage?.alt}</DialogDescription>
           <div className="relative aspect-video">
             {fullscreenImage && (
-              <Image src={fullscreenImage} alt="Fullscreen event" fill className="object-contain" />
+              <Image src={fullscreenImage.src} alt={fullscreenImage.alt} fill className="object-contain" />
             )}
           </div>
         </DialogContent>
