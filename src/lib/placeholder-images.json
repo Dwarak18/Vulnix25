@@ -1,92 +1,134 @@
 [
   {
     "id": 1,
-    "src": "https://picsum.photos/seed/1/800/600",
-    "alt": "VULNIX Event - Group Photo",
-    "hint": "group photo"
-  },
-  {
-    "id": 2,
-    "src": "https://picsum.photos/seed/2/800/600",
-    "alt": "VULNIX Event",
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 10.59.38 PM.jpeg",
+    "alt": "VULNIX Event Image 1",
     "hint": "cybersecurity event"
   },
   {
-    "id": 3,
-    "src": "https://picsum.photos/seed/3/800/600",
-    "alt": "VULNIX Event",
-    "hint": "student presentation"
+    "id": 2,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 10.59.43 PM.jpeg",
+    "alt": "VULNIX Event Image 2",
+    "hint": "students presentation"
   },
   {
-    "id": 4,
-    "src": "https://picsum.photos/seed/4/800/600",
-    "alt": "VULNIX Event",
+    "id": 3,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 10.59.45 PM.jpeg",
+    "alt": "VULNIX Event Image 3",
     "hint": "coding competition"
   },
   {
-    "id": 5,
-    "src": "https://picsum.photos/seed/5/800/600",
-    "alt": "VULNIX Event",
+    "id": 4,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 10.59.48 PM.jpeg",
+    "alt": "VULNIX Event Image 4",
     "hint": "tech talk"
   },
   {
-    "id": 6,
-    "src": "https://picsum.photos/seed/6/800/600",
-    "alt": "VULNIX Event",
+    "id": 5,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.33.18 PM.jpeg",
+    "alt": "VULNIX Event Image 5",
     "hint": "audience listening"
   },
   {
-    "id": 7,
-    "src": "https://picsum.photos/seed/7/800/600",
-    "alt": "VULNIX Event",
+    "id": 6,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.33.38 PM.jpeg",
+    "alt": "VULNIX Event Image 6",
     "hint": "panel discussion"
   },
   {
-    "id": 8,
-    "src": "https://picsum.photos/seed/8/800/600",
-    "alt": "VULNIX Event - Inauguration",
+    "id": 7,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.33.42 PM.jpeg",
+    "alt": "VULNIX Event Image 7",
     "hint": "inauguration ceremony"
   },
   {
-    "id": 9,
-    "src": "https://picsum.photos/seed/9/800/600",
-    "alt": "VULNIX Event - Prize Distribution",
+    "id": 8,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.33.45 PM.jpeg",
+    "alt": "VULNIX Event Image 8",
     "hint": "award ceremony"
   },
   {
-    "id": 10,
-    "src": "https://picsum.photos/seed/10/800/600",
-    "alt": "VULNIX Event",
+    "id": 9,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.17 PM.jpeg",
+    "alt": "VULNIX Event Image 9",
     "hint": "networking students"
   },
   {
-    "id": 11,
-    "src": "https://picsum.photos/seed/11/800/600",
-    "alt": "VULNIX Event",
+    "id": 10,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.18 PM.jpeg",
+    "alt": "VULNIX Event Image 10",
     "hint": "hacking challenge"
   },
   {
-    "id": 12,
-    "src": "https://picsum.photos/seed/12/800/600",
-    "alt": "VULNIX Event",
+    "id": 11,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.21 PM (1).jpeg",
+    "alt": "VULNIX Event Image 11",
     "hint": "keynote speaker"
   },
   {
-    "id": 13,
-    "src": "https://picsum.photos/seed/13/800/600",
-    "alt": "VULNIX Event",
+    "id": 12,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.28 PM.jpeg",
+    "alt": "VULNIX Event Image 12",
     "hint": "workshop session"
   },
   {
-    "id": 14,
-    "src": "https://picsum.photos/seed/14/800/600",
-    "alt": "VULNIX'25 Logo",
+    "id": 13,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.30 PM (1).jpeg",
+    "alt": "VULNIX Event Image 13",
     "hint": "event branding"
   },
   {
-    "id": 15,
-    "src": "https://picsum.photos/seed/15/800/600",
-    "alt": "VULNIX Event",
+    "id": 14,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.30 PM.jpeg",
+    "alt": "VULNIX Event Image 14",
     "hint": "symposium hall"
+  },
+  {
+    "id": 15,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.35 PM.jpeg",
+    "alt": "VULNIX Event Image 15",
+    "hint": "group photo"
+  },
+  {
+    "id": 16,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.36 PM.jpeg",
+    "alt": "VULNIX Event Image 16",
+    "hint": "students competing"
+  },
+  {
+    "id": 17,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.37 PM.jpeg",
+    "alt": "VULNIX Event Image 17",
+    "hint": "judges panel"
+  },
+  {
+    "id": 18,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.38 PM.jpeg",
+    "alt": "VULNIX Event Image 18",
+    "hint": "crowd shot"
+  },
+  {
+    "id": 19,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.39 PM.jpeg",
+    "alt": "VULNIX Event Image 19",
+    "hint": "interactive session"
+  },
+  {
+    "id": 20,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.40 PM (1).jpeg",
+    "alt": "VULNIX Event Image 20",
+    "hint": "event banner"
+  },
+  {
+    "id": 21,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.40 PM.jpeg",
+    "alt": "VULNIX Event Image 21",
+    "hint": "participant badge"
+  },
+  {
+    "id": 22,
+    "src": "/gallery/WhatsApp Image 2026-02-20 at 11.34.41 PM.jpeg",
+    "alt": "VULNIX Event Image 22",
+    "hint": "closing ceremony"
   }
 ]
