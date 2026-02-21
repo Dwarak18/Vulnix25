@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+      fontFamily: {
+        mono: ['var(--font-mono)'],
+      },
   		colors: {
         // Existing ShadCN UI colors using CSS variables
   			background: 'hsl(var(--background))',

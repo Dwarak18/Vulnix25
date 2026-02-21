@@ -1,29 +1,23 @@
 
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google'; // Assuming Geist font setup
+import { Roboto_Mono } from 'next/font/google';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster"; // Import Toaster
+import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/sections/Header';
-import LayoutClientWrapper from '@/components/common/LayoutClientWrapper'; // Import the wrapper
-import BackgroundMusic from '@/components/common/BackgroundMusic'; // Import BackgroundMusic
+import LayoutClientWrapper from '@/components/common/LayoutClientWrapper';
+import BackgroundMusic from '@/components/common/BackgroundMusic';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+const robotoMono = Roboto_Mono({
+  variable: '--font-mono',
   subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
-  title: 'VULNIX`26 | CYZOR & CYBEXA', // Updated title
+  title: 'VULNIX`25 | CYZOR & CYBEXA',
   description: 'VULNIX - College Symposium on Cybersecurity Awareness',
   icons: [
-    // Reference the local icon file expected to be in the src/app directory
-    { rel: 'icon', url: 'src/app/cybersecurity.ico' },
-  ], // Ensures a specific favicon is linked via metadata
+    { rel: 'icon', url: '/cybersecurity.ico' },
+  ],
 
 };
 
@@ -34,17 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      {/* Force dark theme based on cyberpunk palette */}
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {/* Wrap Header and children in the client wrapper */}
+      <body className={`${robotoMono.variable} font-mono antialiased`}>
         <LayoutClientWrapper>
            <div className="relative">
              <Header/>
-             <main>{children}</main> {/* Wrap children in main */}
-             <BackgroundMusic /> {/* Add the music component */}
+             <main>{children}</main>
+             <BackgroundMusic />
            </div>
         </LayoutClientWrapper>
-        <Toaster /> {/* Toaster remains outside the main conditional rendering */}
+        <Toaster />
       </body>
     </html>
   );

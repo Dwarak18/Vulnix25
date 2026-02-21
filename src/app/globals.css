@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: 'Geist', sans-serif; /* Using Geist font from layout */
-}
-
 @layer base {
   :root {
     /* Cyberpunk Palette - Dark Theme Dominant */
