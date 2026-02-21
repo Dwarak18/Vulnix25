@@ -51,10 +51,10 @@ const EventsSection = () => {
 
         <Tabs defaultValue="technical" className="w-full max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 bg-card/80 border border-border backdrop-blur-lg mb-12">
-            <TabsTrigger value="technical" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-base py-2">
+            <TabsTrigger value="technical" className="rounded-none data-[state=active]:shadow-none data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-base py-2">
               <BrainCircuit className="mr-2 h-5 w-5"/> Technical
             </TabsTrigger>
-            <TabsTrigger value="non-technical" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-base py-2">
+            <TabsTrigger value="non-technical" className="rounded-none data-[state=active]:shadow-none data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-base py-2">
               <Gamepad2 className="mr-2 h-5 w-5"/> Non-Technical
             </TabsTrigger>
           </TabsList>
