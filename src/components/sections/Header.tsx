@@ -1,7 +1,7 @@
 
-'use client'; // Add this directive for useState and event handlers
+'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,41 +10,51 @@ import {
   SheetContent,
   SheetTrigger,
   SheetClose,
-  SheetTitle, // Import SheetTitle
 } from "@/components/ui/sheet";
-import { cn } from '@/lib/utils';
-
-const externalRegisterUrl = 'https://forms.gle/kpPKCXGsCG7aSuQf9';
+import { motion } from 'framer-motion';
 
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/#events", label: "Events" },
-  { href: "/#timeline", label: "Timeline" },
-  { href: "/#location", label: "Location" },
   { href: "/#about", label: "About" },
-  { href: externalRegisterUrl, label: "Register", target: "_blank", rel: "noopener noreferrer" }, // Updated Register link
+  { href: "/#events", label: "Events" },
+  { href: "/#gallery", label: "Highlights" },
+  { href: "/#timeline", label: "Timeline" },
+  { href: "/#brainstormx", label: "BrainstormX" },
 ];
 
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 w-full bg-background/90 backdrop-blur-md z-50 shadow-md">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link href="/" className="text-xl font-bold text-primary glow-link">
-          VULNIX
+    <motion.header
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-background/80 backdrop-blur-lg border-b border-border/50' : 'bg-transparent'
+      }`}
+    >
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="font-heading text-2xl font-bold text-primary text-glow">
+          VULNIX'25
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:block">
-          <ul className="flex space-x-6">
+          <ul className="flex items-center space-x-8">
             {navItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="glow-link text-sm hover:text-primary transition-colors"
-                  target={item.target}
-                  rel={item.rel}
+                  className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
                   >
                   {item.label}
                 </Link>
@@ -62,31 +72,21 @@ const Header: React.FC = () => {
                  <span className="sr-only">Toggle Menu</span>
                </Button>
              </SheetTrigger>
-             {/* SheetContent inherits styling from sheet.tsx */}
-             <SheetContent side="right" className="w-[250px] p-6">
-                {/* Add sr-only Title for Accessibility */}
-                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                {/* Mobile Menu Logo */}
-                <div className="mb-8">
-                   <Link href="/" className="text-2xl font-bold text-primary glow-link" onClick={() => setIsMobileMenuOpen(false)}>
-                     VULNIX
+             <SheetContent side="right" className="w-[280px] p-6 bg-background/90 backdrop-blur-xl">
+                <div className="mb-12">
+                   <Link href="/" className="font-heading text-3xl font-bold text-primary text-glow" onClick={() => setIsMobileMenuOpen(false)}>
+                     VULNIX'25
                    </Link>
                 </div>
-                {/* Mobile Menu Links */}
                 <nav>
-                  <ul className="flex flex-col space-y-4">
+                  <ul className="flex flex-col space-y-6">
                     {navItems.map((item) => (
                       <li key={item.href}>
                          <SheetClose asChild>
                            <Link
                              href={item.href}
-                             className={cn(
-                                "block py-2 text-lg text-sidebar-foreground hover:text-primary transition-colors glow-link",
-                                // Add active link styling if needed based on current route
-                             )}
-                             target={item.target}
-                             rel={item.rel}
-                             onClick={() => setIsMobileMenuOpen(false)} // Close sheet on link click
+                             className="block py-2 text-xl text-foreground hover:text-primary transition-colors"
+                             onClick={() => setIsMobileMenuOpen(false)}
                            >
                              {item.label}
                            </Link>
@@ -99,7 +99,7 @@ const Header: React.FC = () => {
            </Sheet>
         </div>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

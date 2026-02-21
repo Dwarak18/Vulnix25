@@ -1,84 +1,83 @@
-
-'use client'; // Add this directive
+'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { CalendarDays } from 'lucide-react'; // Changed icon to CalendarDays
-import CountdownTimer from '@/components/sections/CountdownTimer'; // Import the CountdownTimer
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ArrowDown, CheckBadgeIcon } from '@heroicons/react/24/solid';
+import AnimatedGridPattern from '../common/AnimatedGridPattern';
+import AnimatedCounter from '../common/AnimatedCounter';
+import { Badge } from '../ui/badge';
+import { Users, Zap, Award, BarChart } from 'lucide-react';
 
 const HeroSection = () => {
-  const handleScroll = () => {
-    // Ensure this runs only on the client where `document` is available
-    document.getElementById('timeline')?.scrollIntoView({ behavior: 'smooth' }); // Changed target to 'timeline'
+  const handleScroll = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleRegisterClick = () => {
-      // Open the external Google Form link in a new tab
-      window.open('https://forms.gle/kpPKCXGsCG7aSuQf9', '_blank', 'noopener,noreferrer');
-    };
-
-  // Target date: May 17, 2025
-  const targetDate = new Date('2025-05-17T00:00:00').toISOString();
+  const stats = [
+    { value: 300, label: 'Participants', icon: <Users className="h-6 w-6" /> },
+    { value: 10, label: 'Events', icon: <Zap className="h-6 w-6" /> },
+    { value: 1, label: 'Flagship CTF', icon: <Award className="h-6 w-6" /> },
+    { value: 1, label: 'Legacy Built', icon: <BarChart className="h-6 w-6" /> },
+  ];
 
   return (
-    <section
-      id="hero"
-      className="relative flex h-screen flex-col items-center justify-center text-center text-foreground overflow-hidden parallax-section"
-      style={{
-        backgroundImage: `url('https://4kwallpapers.com/images/walls/thumbs_3t/15155.jpg')`,
-      }}
-      data-ai-hint="cyberpunk city night neon"
-    >
-      {/* Overlay for contrast if using a background image */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/60 to-black/90 z-0"></div>
+    <section id="hero" className="relative h-screen flex flex-col items-center justify-center text-center text-foreground overflow-hidden">
+      <AnimatedGridPattern
+        numSquares={50}
+        maxOpacity={0.1}
+        duration={3}
+        repeatDelay={1}
+        className="absolute inset-0"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/50 to-background z-0"></div>
 
-      <div className="relative z-10 p-4 flex flex-col items-center">
-        {/* Announcement Alert */}
-        <Alert className="mb-4 w-full max-w-3xl bg-yellow-500 text-black">
-          <AlertTitle className="font-bold text-lg">
-            Exciting Cash Rewards!
-          </AlertTitle>
-          <AlertDescription>All Technical Events have cash prizes. Participate and win!</AlertDescription>
-        </Alert>
-
-        {/* Apply glow-link class for hover effect and font-mono for cyberpunk style */}
-        <h1 className="text-5xl md:text-7xl font-mono font-extrabold mb-4 tracking-tight leading-tight glow-link cursor-default"> {/* Changed cursor to default and added font-mono */}
-          <span className="text-primary drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">VULN</span>
-          <span className="text-secondary drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">IX</span>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="relative z-10 p-4 flex flex-col items-center"
+      >
+        <Badge variant="outline" className="mb-4 bg-primary/10 border-primary/30 text-primary py-1 px-4 text-sm">
+          Successfully Concluded
+        </Badge>
+        <h1 className="font-heading text-5xl md:text-7xl lg:text-8xl font-black mb-4 text-glow">
+          VULNIX'25
         </h1>
-        <p className="text-xl md:text-2xl mb-8 max-w-3xl text-muted-foreground font-light"> {/* Kept font-light (Geist Sans) for readability */}
-          Explore the frontiers of cybersecurity. Engage, learn, and compete in VULNIX, the premier tech symposium.
+        <p className="text-xl md:text-2xl mb-8 max-w-3xl text-muted-foreground font-light">
+          Where Vulnerabilities Met Vision. A look back at the high-impact cybersecurity symposium that united the next generation of security engineers, researchers, and innovators.
         </p>
 
-        {/* Add the Countdown Timer */}
-        <div className="mb-8">
-          <CountdownTimer targetDate={targetDate} />
-        </div>
-
-        <div className="flex gap-4">
-          <Button
-            size="lg"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 animate-pulse-glow shadow-lg"
-            onClick={handleScroll} // Use the client-side safe handler to scroll to #timeline
-          >
-            Discover Events {/* Changed button text */}
-            <CalendarDays className="ml-2 h-5 w-5" /> {/* Kept icon */}
+        <div className="flex flex-wrap justify-center gap-4">
+          <Button size="lg" onClick={() => handleScroll('gallery')}>
+            View Highlights
           </Button>
-          <Button
-            size="lg"
-            className="bg-accent text-accent-foreground hover:bg-accent/90 animate-pulse-glow shadow-lg"
-            onClick={handleRegisterClick} // Updated onClick handler
-          >
-            Register Now
+          <Button size="lg" variant="outline" onClick={() => handleScroll('events')}>
+            Explore Events
           </Button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Subtle animated elements */}
-      <div className="absolute bottom-10 left-10 h-1 w-1 bg-accent rounded-full animate-ping opacity-50"></div>
-      <div className="absolute top-20 right-20 h-2 w-2 bg-primary rounded-full animate-pulse opacity-60"></div>
-      <div className="absolute bottom-1/4 right-1/4 h-1 w-1 bg-secondary rounded-full animate-ping delay-500 opacity-40"></div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.8 }}
+        className="absolute bottom-0 left-0 right-0 z-10 p-8"
+      >
+        <div className="container mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center max-w-5xl mx-auto">
+            {stats.map((stat, index) => (
+              <div key={index} className="flex flex-col items-center gap-2">
+                 <div className="text-primary">{stat.icon}</div>
+                <div className="text-3xl md:text-4xl font-bold font-heading">
+                  <AnimatedCounter to={stat.value} />+
+                </div>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 };

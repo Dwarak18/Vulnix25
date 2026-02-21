@@ -4,131 +4,65 @@
 
 @layer base {
   :root {
-    /* Cyberpunk Palette - Dark Theme Dominant */
-    --background-start-hsl: 270 50% 5%; /* Deep Purple */
-    --background-end-hsl: 300 60% 8%; /* Darker Pinkish Purple */
-    --background: 270 50% 5%; /* Default background if gradient isn't applied */
-    --foreground: 210 40% 98%; /* Light Cyan/White */
+    /* Dark Cyber Aesthetic Palette */
+    --background-start-rgb: 2 6 23; /* Almost black */
+    --background-end-rgb: 15 23 42; /* Dark slate blue */
+    --background: 222 47% 11%; /* Default background */
+    --foreground: 210 40% 98%; /* Light gray/white */
 
-    --card: 240 30% 10%; /* Dark Blue/Purple */
-    --card-foreground: 210 40% 96%; /* Lighter Cyan/White */
+    --card: 222 47% 13%; /* Slightly lighter than bg */
+    --card-foreground: 210 40% 96%;
 
-    --popover: 240 30% 8%; /* Slightly darker popover */
+    --popover: 224 71% 4%; /* very dark blue */
     --popover-foreground: 210 40% 96%;
 
-    --primary: 320 80% 60%; /* Neon Pink */
-    --primary-foreground: 320 80% 10%; /* Dark Pink contrast */
+    --primary: 217 91% 60%; /* Electric Blue */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 70% 50%; /* Electric Blue */
-    --secondary-foreground: 220 70% 95%; /* Light Blue contrast */
+    --secondary: 217 33% 50%; /* Graphite/muted blue */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 240 20% 15%; /* Muted Dark Blue/Purple */
-    --muted-foreground: 240 5% 65%; /* Grayish Muted */
+    --muted: 215 28% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 120 100% 50%; /* Electric Green */
-    --accent-foreground: 120 100% 5%; /* Dark Green contrast */
+    --accent: 217 91% 60%; /* Using electric blue as accent */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 70% 50%; /* Bright Red */
-    --destructive-foreground: 0 70% 95%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 20% 20%; /* Darker Border */
-    --input: 240 20% 25%; /* Slightly Lighter Input Background */
-    --ring: 120 100% 50%; /* Electric Green for focus rings */
+    --border: 217 33% 25%; /* Muted blue border */
+    --input: 217 33% 18%;
+    --ring: 217 91% 60%; /* Electric blue for focus rings */
 
     --radius: 0.5rem;
-
-    --chart-1: 320 80% 60%; /* Neon Pink */
-    --chart-2: 220 70% 50%; /* Electric Blue */
-    --chart-3: 120 100% 50%; /* Electric Green */
-    --chart-4: 45 100% 50%; /* Neon Yellow/Orange */
-    --chart-5: 270 80% 65%; /* Bright Purple */
-
-     /* Sidebar specific colors - can inherit or be specific */
-    --sidebar-background: 260 40% 8%; /* Dark Purple */
-    --sidebar-foreground: 210 30% 90%;
-    --sidebar-primary: 120 100% 50%; /* Electric Green */
-    --sidebar-primary-foreground: 120 100% 5%;
-    --sidebar-accent: 240 30% 15%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 240 20% 20%;
-    --sidebar-ring: 120 100% 50%;
   }
-
-  /* Apply base background and text color */
-  body {
-    @apply bg-background text-foreground;
-    /* Apply the gradient background */
-    background: linear-gradient(135deg, hsl(var(--background-start-hsl)), hsl(var(--background-end-hsl)));
-    min-height: 100vh;
-    cursor: crosshair; /* Apply futuristic cursor */
-  }
-
-  /* Ensure links use accent color */
-   a {
-    @apply text-accent hover:text-accent/80 transition-colors;
-   }
-
-   /* Ensure interactive elements retain appropriate cursors */
-   a, button, [role="button"], input[type="submit"], input[type="button"], select, label[for] {
-    cursor: pointer; /* Keep pointer for interactive elements */
-   }
-
-   input[type="text"], input[type="email"], input[type="password"], textarea {
-    cursor: text; /* Keep text cursor for text inputs */
-   }
 }
 
 @layer base {
   * {
     @apply border-border;
   }
-}
-
-/* Add custom animation for subtle pulse */
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 1;
-    /* Use HSL variable with alpha for box-shadow color */
-    box-shadow: 0 0 5px hsl(var(--accent) / 0.5), 0 0 10px hsl(var(--accent) / 0.3);
-  }
-  50% {
-    opacity: 0.9;
-    /* Use HSL variable with alpha for box-shadow color */
-    box-shadow: 0 0 10px hsl(var(--accent) / 0.7), 0 0 20px hsl(var(--accent) / 0.5);
+  body {
+    @apply bg-background text-foreground;
+    background-color: rgb(var(--background-start-rgb));
+    background-image: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
+    min-height: 100vh;
   }
 }
 
-
-.animate-pulse-glow {
-  animation: pulse-glow 2.5s infinite ease-in-out;
-}
-
-/* Simple Parallax attempt using background attachment */
-.parallax-section {
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
-/* Link glow effect on hover */
-.glow-link {
-    text-decoration: none;
-}
-
-.glow-link:hover {
-    color: hsl(var(--primary));
-    text-shadow:
-        0 0 5px hsl(var(--primary) / 0.7),
-        0 0 15px hsl(var(--primary) / 0.5),
-        0 0 30px hsl(var(--primary) / 0.3);
-    transition: text-shadow 0.3s ease;
-}
-
-/* Static text glow effect using accent color */
+/* Custom glow effects */
 .text-glow {
   text-shadow:
-    0 0 8px hsl(var(--accent) / 0.6),
-    0 0 16px hsl(var(--accent) / 0.4),
-    0 0 24px hsl(var(--accent) / 0.2);
+    0 0 5px hsl(var(--primary) / 0.5),
+    0 0 10px hsl(var(--primary) / 0.3),
+    0 0 20px hsl(var(--primary) / 0.2);
+}
+
+.box-glow {
+   box-shadow: 0 0 15px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.2);
+}
+
+.box-glow-secondary {
+   box-shadow: 0 0 15px hsl(var(--secondary) / 0.3), 0 0 30px hsl(var(--secondary) / 0.2);
 }

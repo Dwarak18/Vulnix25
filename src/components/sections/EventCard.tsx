@@ -1,44 +1,64 @@
+'use client';
+
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { Event } from '@/constants/events';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Verified } from 'lucide-react';
-import { Clock } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface EventCardProps {
   event: Event;
+  index: number;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const Icon = event.icon;
-  const cardBorderColor = event.type === 'Technical' ? 'border-secondary/50' : 'border-primary/50';
-  const badgeVariant = event.type === 'Technical' ? 'secondary' : 'default'; // Pink for non-tech, Blue for tech
+const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: index * 0.1,
+        duration: 0.5,
+        ease: 'easeOut',
+      },
+    },
+  };
 
   return (
-    <Card className={`bg-card/80 backdrop-blur-sm shadow-lg hover:shadow-accent/20 transition-shadow duration-300 ${cardBorderColor} border-l-4 overflow-hidden h-full flex flex-col`}>
-      <CardHeader className="flex flex-row items-start gap-4 pb-4">
-        <div className={`p-2 rounded-md bg-${event.type === 'Technical' ? 'secondary' : 'primary'}/20`}>
-          <Icon className={`h-8 w-8 text-${event.type === 'Technical' ? 'secondary' : 'primary'}`} />
-        </div>
-        <div className="flex-1">
-          <CardTitle className="text-xl font-semibold leading-tight">{event.name}</CardTitle>
-           <Badge variant={badgeVariant} className="mt-1 text-xs">{event.type}</Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="flex-grow flex flex-col justify-between pt-0">
-         <CardDescription className="text-sm text-muted-foreground mb-4 flex-grow">
-           {event.description}
-           <p className='mt-2'>
-            <span className='font-bold flex items-center gap-2 text-accent'><Verified className='h-4 w-4'/> Certificate is provided.</span>
-            {/* <span className='font-semibold text-muted-foreground ml-1'> is provided.</span> */}
-           </p>
-         </CardDescription>
-         <div className="flex items-center text-xs text-accent font-mono mt-auto pt-2 border-t border-border/50">
-           <Clock className="h-3 w-3 mr-1.5" />
-           <span>{event.startTime} - {event.endTime}</span>
-         </div>
-      </CardContent>
-    </Card>
+    <motion.div
+      variants={cardVariants}
+      className="h-full"
+      whileHover={{ y: -8, transition: { duration: 0.2 } }}
+    >
+      <Card
+        className={cn(
+          "h-full bg-card/50 backdrop-blur-sm border-2 border-transparent transition-all duration-300 overflow-hidden group hover:border-primary/80 hover:box-glow",
+          event.type === 'Technical' ? "hover:border-primary/80" : "hover:border-secondary/80"
+        )}
+      >
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <CardTitle className="font-heading text-xl lg:text-2xl">{event.name}</CardTitle>
+            <Badge variant={event.type === 'Technical' ? 'default' : 'secondary'} className="shrink-0">
+              {event.type}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col h-full">
+          <CardDescription className="text-muted-foreground mb-4">{event.description}</CardDescription>
+          <div className="mt-auto flex justify-between items-center text-xs text-muted-foreground pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span>Completed Successfully</span>
+            </div>
+            <span>{event.time}</span>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

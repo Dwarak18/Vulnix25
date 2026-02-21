@@ -1,24 +1,27 @@
 
 import type { Metadata } from 'next';
-import { Roboto_Mono } from 'next/font/google';
+import { Orbitron, Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Header from '@/components/sections/Header';
 import LayoutClientWrapper from '@/components/common/LayoutClientWrapper';
-import BackgroundMusic from '@/components/common/BackgroundMusic';
+import { cn } from '@/lib/utils';
 
-const robotoMono = Roboto_Mono({
-  variable: '--font-mono',
+const orbitron = Orbitron({
   subsets: ['latin'],
+  variable: '--font-heading',
+  weight: ['400', '700', '900'],
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-body',
 });
 
 export const metadata: Metadata = {
-  title: 'VULNIX`25 | CYZOR & CYBEXA',
-  description: 'VULNIX - College Symposium on Cybersecurity Awareness',
-  icons: [
-    { rel: 'icon', url: '/cybersecurity.ico' },
-  ],
-
+  title: "VULNIX'25 | Past Event Showcase",
+  description: 'VULNIX’25 – Where Vulnerabilities Met Vision. A look back at the flagship cybersecurity symposium.',
+  icons: [{ rel: 'icon', url: '/cybersecurity.ico' }],
 };
 
 export default function RootLayout({
@@ -28,12 +31,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${robotoMono.variable} font-mono antialiased`}>
+      <body className={cn(
+        'antialiased',
+        orbitron.variable,
+        inter.variable
+      )}>
         <LayoutClientWrapper>
-           <div className="relative">
+           <div className="relative font-body">
              <Header/>
              <main>{children}</main>
-             <BackgroundMusic />
            </div>
         </LayoutClientWrapper>
         <Toaster />

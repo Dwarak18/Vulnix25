@@ -1,211 +1,97 @@
-
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 import { getSortedEvents, type Event } from '@/constants/events';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Phone, User, X } from 'lucide-react'; // Added Phone, User, X icons
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'; // Import Dialog components
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area'; // Import ScrollArea
-import { cn } from '@/lib/utils'; // Import cn
+import { Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import AnimatedGridPattern from '../common/AnimatedGridPattern';
 
-interface EventModalProps {
-  event: Event;
-  isOpen: boolean;
-  onClose: () => void;
-}
+const TimelineEvent = ({ event, index }: { event: Event; index: number }) => {
+  const isEven = index % 2 === 0;
 
-const EventModal: React.FC<EventModalProps> = ({ event, isOpen, onClose }) => {
+  const cardVariants = {
+    hidden: { opacity: 0, x: isEven ? -50 : 50 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.5 } },
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* Adjusted DialogContent styling for max height and overflow */}
-      <DialogContent className="sm:max-w-lg bg-popover backdrop-blur-md border-accent border flex flex-col max-h-[85vh]">
-        <DialogHeader className="flex-shrink-0">
-            <DialogTitle>{event.name}</DialogTitle>
-            <DialogDescription className="pt-2 text-sm">
-              {event.description}
-            </DialogDescription>
-        </DialogHeader>
-
-        {/* Scrollable area for the main content */}
-        <ScrollArea className="flex-grow overflow-y-auto pr-6 -mr-6"> {/* Added pr-6/-mr-6 for scrollbar padding */}
-            <div className="space-y-3 text-sm py-4">
-              <Badge
-                className="mb-2"
-                variant={event.type === 'Technical' ? 'secondary' : 'default'}
-              >
-                {event.type === 'Technical' && (
-                  <div className="flex items-center">
-                    <Badge className="mr-2" variant="outline">
-                      BYOD
-                    </Badge>
-                    <p className="text-muted-foreground text-xs">Bring your own Device (laptop)</p>
-                  </div>
-                )}
-
-                 {event.type}
-               </Badge>
-              <div className="flex items-center text-xs font-mono text-muted-foreground">
-                <Clock className="mr-1.5 h-3 w-3" />
-                {event.startTime} - {event.endTime}
+    <motion.div
+      className="relative pl-8 md:pl-0"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.5 }}
+      variants={cardVariants}
+    >
+      <div className={cn("md:flex items-center w-full", isEven ? "md:flex-row-reverse" : "")}>
+        <div className="md:w-1/2"></div>
+        <div className="md:w-1/2">
+          <Card className="bg-card/50 backdrop-blur-sm shadow-lg border border-border/50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between mb-1">
+                <CardTitle className="font-heading text-lg font-semibold">{event.name}</CardTitle>
+                <Badge variant={event.type === 'Technical' ? 'default' : 'secondary'} className="text-xs ml-2 shrink-0">{event.type}</Badge>
               </div>
-
-              <h4 className="font-semibold mt-4 mb-1 text-foreground">Rules:</h4>
-              <ul className="list-disc list-inside text-xs text-muted-foreground space-y-1">
-                {event.rules.map((rule, index) => (
-                  <li key={index}>{rule}</li>
-                ))}
-              </ul>
-
-              <h4 className="font-semibold mt-4 mb-1 text-foreground">Detailed Description:</h4>
-              <p className="text-xs text-muted-foreground">{event.descriptionDetails}</p>
-
-              <h4 className="font-semibold mt-4 mb-1 text-foreground">Elimination Process:</h4>
-              <p className="text-xs text-muted-foreground">{event.eliminationProcess}</p>
-
-              {/* Contact Information */}
-              <h4 className="font-semibold mt-4 mb-1 text-foreground">Contact:</h4>
-               <div className="space-y-2"> {/* Wrapper for contact sections */}
-                 {/* First Contact */}
-                 <div className="flex flex-col items-start space-y-1">
-                   <div className="flex items-center text-xs text-muted-foreground">
-                     <User className="mr-1.5 h-3 w-3" />
-                     <span>{event.contactName}</span>
-                   </div>
-                   <Button
-                     variant="outline"
-                     size="sm"
-                     className="text-xs h-auto py-1 px-2 border-accent/50 hover:bg-accent/10 hover:text-accent"
-                     asChild
-                   >
-                     <a href={`tel:${event.contactPhone}`} aria-label={`Call ${event.contactName} at ${event.contactPhone}`}>
-                       <Phone className="mr-1.5 h-3 w-3" />
-                       Call {event.contactPhone}
-                     </a>
-                   </Button>
-                 </div>
-
-                 {/* Second Contact (Conditional) */}
-                 {event.contactName2 && event.contactPhone2 && (
-                    <div className="flex flex-col items-start space-y-1 pt-2"> {/* Add padding top */}
-                      <div className="flex items-center text-xs text-muted-foreground">
-                        <User className="mr-1.5 h-3 w-3" />
-                        <span>{event.contactName2}</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-xs h-auto py-1 px-2 border-accent/50 hover:bg-accent/10 hover:text-accent"
-                        asChild
-                      >
-                        <a href={`tel:${event.contactPhone2}`} aria-label={`Call ${event.contactName2} at ${event.contactPhone2}`}>
-                          <Phone className="mr-1.5 h-3 w-3" />
-                          Call {event.contactPhone2}
-                        </a>
-                      </Button>
-                    </div>
-                 )}
-               </div>
-            </div>
-        </ScrollArea>
-
-         {/* Explicit Close button in footer (optional, as X is usually present) */}
-          {/* <DialogFooter className="flex-shrink-0 pt-4">
-            <DialogClose asChild>
-              <Button variant="outline">Close</Button>
-            </DialogClose>
-          </DialogFooter> */}
-           {/* DialogContent already includes an 'X' close button by default */}
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-
-const TimelineEvent = ({ event, onEventClick }: { event: Event; onEventClick: () => void }) => {
-   const Icon = event.icon;
-  const badgeVariant = event.type === 'Technical' ? 'secondary' : 'default';
-
-  return (
-    <div className="relative pl-12 pb-8 cursor-pointer group" onClick={onEventClick}>
-      {/* Vertical Line Segment (part of the main line) */}
-      {/* Dot */}
-      <div className="absolute left-0 top-1 transform -translate-x-1/2 w-8 h-8 rounded-full bg-border flex items-center justify-center z-20 group-hover:scale-110 transition-transform ">
-        <div className={cn(
-            "w-6 h-6 rounded-full flex items-center justify-center",
-             event.type === 'Technical' ? 'bg-secondary' : 'bg-primary'
-             )}>
-            <Icon className={cn(
-                "w-4 h-4",
-                 event.type === 'Technical' ? 'text-secondary-foreground' : 'text-primary-foreground'
-                 )} />
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center text-xs text-primary font-mono">
+                <Clock className="h-3 w-3 mr-1.5" />
+                <span>{event.time}</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-        
-      {/* Card */}
-      <Card className="bg-card/80 backdrop-blur-sm shadow-md transition-shadow group-hover:shadow-lg group-hover:shadow-accent/20 border border-border/30 group-hover:border-accent/50 ml-4">
-        <CardHeader className="pb-2">
-          <div className="flex items-center justify-between mb-1">
-            <CardTitle className="text-lg font-semibold">{event.name}</CardTitle>
-            <Badge variant={badgeVariant} className="text-xs ml-2 shrink-0">{event.type}</Badge>
-          </div>
-          <div className="flex items-center text-xs text-accent font-mono">
-            <Clock className="h-3 w-3 mr-1.5" />
-            <span>{event.startTime} - {event.endTime}</span>
-          </div>
-        </CardHeader>
-        <CardContent className="text-xs text-muted-foreground pt-1">
-            <p className="line-clamp-2">{event.description}</p>
-        </CardContent>
-      </Card>
-    </div>
+
+      <div className="absolute top-1/2 -translate-y-1/2 h-4 w-4 rounded-full bg-primary box-glow z-20 left-8 md:left-1/2 -ml-2 transform md:-translate-x-1/2">
+         <div className="absolute inset-0 rounded-full bg-primary/50 animate-ping"></div>
+      </div>
+    </motion.div>
   );
 };
-
 
 const TimelineSection = () => {
   const sortedEvents = getSortedEvents();
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-
-  const handleEventClick = (event: Event) => {
-    setSelectedEvent(event);
-  };
-
-  const handleModalClose = () => setSelectedEvent(null);
 
   return (
     <section
       id="timeline"
-      className="relative py-16 md:py-24 bg-background/90 backdrop-blur-sm parallax-section overflow-hidden"
-      style={{backgroundImage: "url('https://wallpaperaccess.com/download/cyberpunk-pixel-5797258')"}}
-      data-ai-hint="cyberpunk pixel art technology"
+      className="relative py-24 sm:py-32 bg-background overflow-hidden"
     >
-       {/* Overlay for contrast */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/80 to-black/90 z-0"></div>
+       <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.05}
+        duration={3}
+        repeatDelay={1}
+        className="absolute inset-0"
+      />
+      <div className="container mx-auto px-4 max-w-4xl relative z-10">
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-20"
+        >
+          <h2 className="font-heading text-4xl md:text-5xl font-bold text-center mb-4">Event Flow</h2>
+          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+            A chronological look at how the day of intense competition and learning unfolded.
+          </p>
+        </motion.div>
+        
+        <div className="relative flex flex-col gap-12">
+          {/* Vertical Line */}
+          <div className="absolute left-8 top-0 h-full w-0.5 bg-border md:left-1/2 md:-translate-x-1/2 z-0"></div>
 
-      {/* Content container */}
-      <div className="container mx-auto px-4 max-w-3xl relative z-10"> {/* Added relative z-10 */}
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-secondary drop-shadow-md">Event Timeline</h2>
-        <div className="relative">
-          {/* Vertical Line - Made more visible using secondary color */}
-          <div className="absolute left-4 top-0 bottom-0 w-[2px] bg-secondary/50 transform -translate-x-1/2 z-0"></div>
-
-          {/* Event Containers */}
-          <div className="relative z-10">
-            {sortedEvents.map((event) => (
-              <TimelineEvent key={event.id} event={event} onEventClick={() => handleEventClick(event)} />
-            ))}
-          </div>
+          {sortedEvents.map((event, index) => (
+            <TimelineEvent key={event.id} event={event} index={index} />
+          ))}
         </div>
       </div>
-       {selectedEvent && (
-          <EventModal event={selectedEvent} isOpen={true} onClose={handleModalClose} />
-        )}
     </section>
   );
 };
 
 export default TimelineSection;
-
