@@ -76,8 +76,8 @@ const ImpactSection = () => {
               <Card className="bg-card/50 backdrop-blur-sm border-border text-center h-full">
                 <CardHeader>
                   <div className="text-primary mx-auto mb-2">{stat.icon}</div>
-                  <CardTitle className="font-heading text-4xl">
-                    {stat.isCurrency && '₹'}
+                  <CardTitle className="font-heading text-4xl flex items-center justify-center gap-1">
+                    {stat.isCurrency && <span>₹</span>}
                     <AnimatedCounter to={stat.value} />
                   </CardTitle>
                 </CardHeader>
