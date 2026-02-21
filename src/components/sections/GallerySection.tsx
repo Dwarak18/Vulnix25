@@ -19,20 +19,13 @@ const GallerySection = () => {
     setIndex([(index + newDirection + totalImages) % totalImages, newDirection]);
   };
 
-  const nextImage = () => {
-    paginate(1);
-  };
-  
-  const prevImage = () => {
-    paginate(-1);
-  };
+  const nextImage = () => paginate(1);
+  const prevImage = () => paginate(-1);
 
   const startAutoRotate = () => {
-    if (totalImages === 0) return;
-    stopAutoRotate(); // Ensure no multiple intervals are running
-    intervalRef.current = setInterval(() => {
-      paginate(1);
-    }, 4000);
+    if (totalImages <= 1) return;
+    stopAutoRotate();
+    intervalRef.current = setInterval(() => paginate(1), 4000);
   };
 
   const stopAutoRotate = () => {
@@ -45,7 +38,7 @@ const GallerySection = () => {
     startAutoRotate();
     return () => stopAutoRotate();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalImages]); // Re-run if images are loaded later
+  }, [totalImages]);
 
   const handleInteraction = (action: () => void) => {
     stopAutoRotate();
@@ -53,22 +46,7 @@ const GallerySection = () => {
     startAutoRotate();
   };
 
-  const variants = {
-    enter: (direction: number) => ({
-      rotateY: direction > 0 ? 90 : -90,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      rotateY: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      rotateY: direction < 0 ? 90 : -90,
-      opacity: 0,
-    }),
-  };
+  const sideImagesToShow = 2; // Number of images to show on each side of the main image
 
   return (
     <section id="gallery" className="relative py-24 sm:py-32 bg-background/70 backdrop-blur-sm overflow-hidden">
@@ -97,52 +75,62 @@ const GallerySection = () => {
 
         {totalImages > 0 ? (
           <div 
-            className="relative h-[300px] md:h-[500px] w-full max-w-4xl mx-auto"
-            style={{ perspective: '1000px' }}
+            className="relative h-[300px] md:h-[500px] w-full max-w-5xl mx-auto flex items-center justify-center"
             onMouseEnter={stopAutoRotate}
             onMouseLeave={startAutoRotate}
           >
-            <AnimatePresence initial={false} custom={direction}>
-              <motion.div
-                key={index}
-                custom={direction}
-                variants={variants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  rotateY: { type: 'spring', stiffness: 100, damping: 20 },
-                  opacity: { duration: 0.2 },
-                }}
-                className="absolute w-full h-full"
-                style={{ transformStyle: 'preserve-3d' }}
-              >
-                <div 
-                  className="w-full h-full cursor-pointer group"
-                  onClick={() => setFullscreenImage({ src: images[index].src, alt: images[index].alt })}
+            {Array.from({ length: sideImagesToShow * 2 + 1 }).map((_, i) => {
+              const offset = i - sideImagesToShow;
+              const imageIndex = (index + offset + totalImages) % totalImages;
+              
+              if (!images[imageIndex]) return null;
+
+              const distance = Math.abs(offset);
+              const isInFocus = offset === 0;
+
+              const xPercentage = offset * 40 - (isInFocus ? 0 : offset > 0 ? 10 : -10);
+              const scale = isInFocus ? 1 : 0.7;
+              const opacity = isInFocus ? 1 : 0.3;
+              const zIndex = sideImagesToShow - distance;
+
+              return (
+                <motion.div
+                  key={imageIndex + offset}
+                  className="absolute w-[65%] h-[85%]"
+                  initial={false}
+                  animate={{
+                    x: `${xPercentage}%`,
+                    scale,
+                    opacity,
+                    zIndex,
+                  }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                  onClick={() => {
+                    if (isInFocus) {
+                      setFullscreenImage({ src: images[imageIndex].src, alt: images[imageIndex].alt });
+                    } else {
+                      handleInteraction(() => paginate(offset));
+                    }
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
-                  <Image
-                    src={images[index].src}
-                    alt={images[index].alt}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    className="object-cover rounded-lg"
-                    data-ai-hint={images[index].hint}
-                    priority={true}
-                  />
-                  <div className="absolute inset-0 bg-black/20 rounded-lg group-hover:bg-black/10 transition-colors"></div>
-                  <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
-                  <div 
-                    className="absolute inset-0 rounded-lg"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
-                      content: '""',
-                    }}
-                  ></div>
-                  <div className="absolute inset-0 rounded-lg box-glow opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
+                  <div className="relative w-full h-full group">
+                    <Image
+                      src={images[imageIndex].src}
+                      alt={images[imageIndex].alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover rounded-lg"
+                      data-ai-hint={images[imageIndex].hint}
+                      priority={isInFocus}
+                    />
+                    <div className="absolute inset-0 bg-black/40 rounded-lg group-hover:bg-black/20 transition-colors" style={{ opacity: isInFocus ? 0 : 0.5 }}></div>
+                    <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
+                     {isInFocus && <div className="absolute inset-0 rounded-lg box-glow opacity-0 group-hover:opacity-100 transition-opacity"></div>}
+                  </div>
+                </motion.div>
+              );
+            })}
 
             <button
               onClick={() => handleInteraction(prevImage)}
