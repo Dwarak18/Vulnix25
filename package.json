@@ -9,7 +9,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "rename:gallery": "node scripts/rename-gallery-images.js"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.6.2",
