@@ -35,8 +35,10 @@ const EventCard: React.FC<EventCardProps> = ({ event, index }) => {
     >
       <Card
         className={cn(
-          "h-full bg-card/50 backdrop-blur-sm border-2 border-transparent transition-all duration-300 overflow-hidden group hover:border-primary/80 hover:box-glow",
-          event.type === 'Technical' ? "hover:border-primary/80" : "hover:border-secondary/80"
+          "h-full bg-card/50 backdrop-blur-sm border-2 border-transparent transition-all duration-300 overflow-hidden group",
+          event.type === 'Technical'
+            ? "hover:border-primary/80 hover:box-glow"
+            : "hover:border-secondary/80 hover:box-glow-secondary"
         )}
       >
         <CardHeader>
