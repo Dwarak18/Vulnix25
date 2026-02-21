@@ -1,13 +1,14 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { eventsData } from '@/constants/events';
 import EventCard from './EventCard';
 import { BrainCircuit, Gamepad2 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AnimatedGridPattern from '../common/AnimatedGridPattern';
+import { cn } from '@/lib/utils';
 
 const EventsSection = () => {
+  const [activeTab, setActiveTab] = useState('technical');
   const technicalEvents = eventsData.filter(event => event.type === 'Technical');
   const nonTechnicalEvents = eventsData.filter(event => event.type === 'Non-Technical');
 
@@ -20,6 +21,11 @@ const EventsSection = () => {
       },
     },
   };
+  
+  const TABS = [
+      { id: 'technical', label: 'Technical', Icon: BrainCircuit },
+      { id: 'non-technical', label: 'Non-Technical', Icon: Gamepad2 },
+  ];
 
   return (
     <section
@@ -49,42 +55,58 @@ const EventsSection = () => {
           </p>
         </motion.div>
 
-        <Tabs defaultValue="technical" className="w-full max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 bg-card/80 border border-border backdrop-blur-lg mb-12">
-            <TabsTrigger value="technical" className="rounded-none data-[state=active]:shadow-none data-[state=active]:bg-primary/20 data-[state=active]:text-primary text-base py-2">
-              <BrainCircuit className="mr-2 h-5 w-5"/> Technical
-            </TabsTrigger>
-            <TabsTrigger value="non-technical" className="rounded-none data-[state=active]:shadow-none data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-base py-2">
-              <Gamepad2 className="mr-2 h-5 w-5"/> Non-Technical
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="technical">
+        <div className="w-full max-w-xs mx-auto mb-12">
+            <div className="relative flex w-full p-1 bg-card/80 border border-border backdrop-blur-lg rounded-full">
+                <motion.div
+                    className="absolute top-1 left-1 h-[calc(100%-8px)] w-1/2 bg-primary rounded-full z-0"
+                    layout
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    animate={{ x: activeTab === 'technical' ? '0%' : '100%' }}
+                />
+                {TABS.map(tab => (
+                    <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={cn(
+                            'relative z-10 flex-1 flex items-center justify-center text-base py-2 rounded-full transition-colors duration-300',
+                            activeTab === tab.id ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                        )}
+                        style={{ WebkitTapHighlightColor: "transparent" }}
+                    >
+                        <tab.Icon className="mr-2 h-5 w-5" />
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+        
+        <div>
+          {activeTab === 'technical' ? (
              <motion.div
+                key="technical"
                 variants={containerVariants}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.1 }}
+                animate="visible"
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
                 {technicalEvents.map((event, i) => (
                   <EventCard key={event.id} event={event} index={i}/>
                 ))}
              </motion.div>
-          </TabsContent>
-          <TabsContent value="non-technical">
+          ) : (
              <motion.div
+                key="non-technical"
                 variants={containerVariants}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.1 }}
+                animate="visible"
                 className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
               >
                 {nonTechnicalEvents.map((event, i) => (
                   <EventCard key={event.id} event={event} index={i} />
                 ))}
              </motion.div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
     </section>
   );
