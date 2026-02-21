@@ -1,11 +1,12 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import images from '@/lib/placeholder-images.json';
 import AnimatedGridPattern from '../common/AnimatedGridPattern';
+import { cn } from '@/lib/utils';
 
 const GallerySection = () => {
   const [[index, direction], setIndex] = useState([0, 0]);
@@ -96,7 +97,7 @@ const GallerySection = () => {
               return (
                 <motion.div
                   key={imageIndex + offset}
-                  className="absolute w-[65%] h-[85%]"
+                  className="absolute w-[65%] aspect-video cursor-pointer"
                   initial={false}
                   animate={{
                     x: `${xPercentage}%`,
@@ -104,7 +105,7 @@ const GallerySection = () => {
                     opacity,
                     zIndex,
                   }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 25 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 30 }}
                   onClick={() => {
                     if (isInFocus) {
                       setFullscreenImage({ src: images[imageIndex].src, alt: images[imageIndex].alt });
@@ -112,19 +113,22 @@ const GallerySection = () => {
                       handleInteraction(() => paginate(offset));
                     }
                   }}
-                  style={{ cursor: 'pointer' }}
                 >
                   <div className="relative w-full h-full group">
                     <Image
                       src={images[imageIndex].src}
                       alt={images[imageIndex].alt}
                       fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
+                      sizes="(max-width: 768px) 65vw, 42vw"
+                      quality={isInFocus ? 90 : 75}
                       className="object-cover rounded-lg"
                       data-ai-hint={images[imageIndex].hint}
                       priority={isInFocus}
                     />
-                    <div className="absolute inset-0 bg-black/40 rounded-lg group-hover:bg-black/20 transition-colors" style={{ opacity: isInFocus ? 0 : 0.5 }}></div>
+                    <div className={cn(
+                      "absolute inset-0 bg-black/40 rounded-lg group-hover:bg-black/20 transition-colors",
+                      isInFocus ? "opacity-0" : "opacity-50"
+                    )}></div>
                     <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
                      {isInFocus && <div className="absolute inset-0 rounded-lg box-glow opacity-0 group-hover:opacity-100 transition-opacity"></div>}
                   </div>
@@ -162,7 +166,7 @@ const GallerySection = () => {
           <DialogDescription className="sr-only">A larger view of the image: {fullscreenImage?.alt}</DialogDescription>
           <div className="relative aspect-video">
             {fullscreenImage && (
-              <Image src={fullscreenImage.src} alt={fullscreenImage.alt} fill className="object-contain" />
+              <Image src={fullscreenImage.src} alt={fullscreenImage.alt} fill className="object-contain" quality={100} />
             )}
           </div>
         </DialogContent>
