@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, type ReactNode } from 'react';
@@ -20,6 +19,22 @@ const LayoutClientWrapper: React.FC<LayoutClientWrapperProps> = ({ children }) =
   const handleLoadingComplete = () => {
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (!isLoading) {
+      const hash = window.location.hash;
+      if (hash) {
+        const id = hash.substring(1); // Remove #
+        const element = document.getElementById(id);
+        if (element) {
+          // Use a timeout to ensure the browser has time to paint the layout
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
+        }
+      }
+    }
+  }, [isLoading]);
 
   if (!isClient) {
     // Render nothing or a minimal server-side placeholder to avoid hydration issues

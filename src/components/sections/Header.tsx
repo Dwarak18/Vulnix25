@@ -33,6 +33,23 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    if (href.startsWith("/#")) {
+      e.preventDefault();
+      const targetId = href.substring(2);
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: "smooth" });
+        history.pushState(null, "", href);
+      }
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+
   return (
     <motion.header
       initial={{ y: -100 }}
@@ -43,7 +60,14 @@ const Header: React.FC = () => {
       }`}
     >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link href="/" className="font-heading text-2xl font-bold text-primary text-glow">
+        <Link href="/" className="font-heading text-2xl font-bold text-primary text-glow"
+          onClick={(e) => {
+            if (window.location.pathname === '/') {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        >
           VULNIX'25
         </Link>
 
@@ -55,6 +79,7 @@ const Header: React.FC = () => {
                 <Link
                   href={item.href}
                   className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+                  onClick={(e) => handleNavClick(e, item.href)}
                   >
                   {item.label}
                 </Link>
@@ -86,7 +111,7 @@ const Header: React.FC = () => {
                            <Link
                              href={item.href}
                              className="block py-2 text-xl text-foreground hover:text-primary transition-colors"
-                             onClick={() => setIsMobileMenuOpen(false)}
+                             onClick={(e) => handleNavClick(e, item.href)}
                            >
                              {item.label}
                            </Link>
