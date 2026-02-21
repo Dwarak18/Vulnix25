@@ -17,4 +17,21 @@ Vulnix 25 is a web application designed to support a cybersecurity event. It ser
 ## Installation
 
 1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/Dwarak18/Vulnix25.git
+    ```
 
+2.  **Navigate into the project directory:**
+    ```bash
+    cd Vulnix25
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+4.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```

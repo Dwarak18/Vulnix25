@@ -7,7 +7,7 @@ const Footer = () => {
 
   const socialLinks = [
     { name: 'Instagram', icon: Instagram, url: 'https://www.instagram.com/vulnix25?igsh=MThkd3pqcWxqNTk1eg%3D%3D' },
-    { name: 'LinkedIn', icon: Linkedin, url: 'https://www.linkedin.com/company/dhanalakshmi-srinivasan-college-of-engineering-and-technology-autonomous/posts/?feedView=all' },
+    { name: 'LinkedIn', icon: Linkedin, url: 'https://www.linkedin.com/in/3105-149cybersecurity' },
   ];
 
   return (
