@@ -14,7 +14,7 @@ const HeroSection = () => {
   };
 
   const stats = [
-    { value: 300, label: 'Participants', icon: <Users className="h-6 w-6" /> },
+    { value: 80, label: 'Teams', icon: <Users className="h-6 w-6" /> },
     { value: 10, label: 'Events', icon: <Zap className="h-6 w-6" /> },
     { value: 1, label: 'Flagship CTF', icon: <Award className="h-6 w-6" /> },
     { value: 1, label: 'Legacy Built', icon: <BarChart className="h-6 w-6" /> },

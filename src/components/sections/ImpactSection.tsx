@@ -9,11 +9,11 @@ import AnimatedGridPattern from '../common/AnimatedGridPattern';
 const ImpactSection = () => {
     
     const stats = [
-        { icon: <Users className="h-8 w-8" />, value: 450, label: 'Total Registrations' },
-        { icon: <Layers className="h-8 w-8" />, value: 150, label: 'Teams Participated' },
+        { icon: <Users className="h-8 w-8" />, value: 250, label: 'Total Registrations' },
+        { icon: <Layers className="h-8 w-8" />, value: 80, label: 'Teams Participated' },
         { icon: <Clock className="h-8 w-8" />, value: 8, label: 'Hours of Competition' },
         { icon: <Award className="h-8 w-8" />, value: 10000, label: 'Prize Pool (INR)', isCurrency: true },
-        { icon: <ClipboardList className="h-8 w-8" />, value: 450, label: 'Certificates Issued' },
+        { icon: <ClipboardList className="h-8 w-8" />, value: 200, label: 'Certificates Issued' },
     ];
 
     const containerVariants = {
@@ -76,7 +76,7 @@ const ImpactSection = () => {
               <Card className="bg-card/50 backdrop-blur-sm border-border text-center h-full">
                 <CardHeader>
                   <div className="text-primary mx-auto mb-2">{stat.icon}</div>
-                  <CardTitle className="font-heading text-4xl md:text-5xl">
+                  <CardTitle className="font-heading text-4xl">
                     {stat.isCurrency && '₹'}
                     <AnimatedCounter to={stat.value} />
                   </CardTitle>
