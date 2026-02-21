@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -9,38 +9,37 @@ import AnimatedGridPattern from '../common/AnimatedGridPattern';
 import { cn } from '@/lib/utils';
 
 const GallerySection = () => {
-  const [[index, direction], setIndex] = useState([0, 0]);
+  const [index, setIndex] = useState(0);
   const [fullscreenImage, setFullscreenImage] = useState<{src: string; alt: string} | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const totalImages = Array.isArray(images) ? images.length : 0;
 
-  const paginate = (newDirection: number) => {
-    if (totalImages === 0) return;
-    setIndex([(index + newDirection + totalImages) % totalImages, newDirection]);
-  };
+  const paginate = useCallback((newDirection: number) => {
+    setIndex(prevIndex => (prevIndex + newDirection + totalImages) % totalImages);
+  }, [totalImages]);
 
-  const nextImage = () => paginate(1);
-  const prevImage = () => paginate(-1);
-
-  const startAutoRotate = () => {
-    if (totalImages <= 1) return;
-    stopAutoRotate();
-    intervalRef.current = setInterval(() => paginate(1), 4000);
-  };
-
-  const stopAutoRotate = () => {
+  const stopAutoRotate = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
-  };
+  }, []);
+
+  const startAutoRotate = useCallback(() => {
+    stopAutoRotate();
+    if (totalImages > 1) {
+      intervalRef.current = setInterval(() => {
+        paginate(1);
+      }, 4000);
+    }
+  }, [totalImages, paginate, stopAutoRotate]);
 
   useEffect(() => {
     startAutoRotate();
-    return () => stopAutoRotate();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [totalImages]);
-
+    return stopAutoRotate;
+  }, [startAutoRotate, stopAutoRotate]);
+  
   const handleInteraction = (action: () => void) => {
     stopAutoRotate();
     action();
@@ -84,7 +83,8 @@ const GallerySection = () => {
               const offset = i - sideImagesToShow;
               const imageIndex = (index + offset + totalImages) % totalImages;
               
-              if (!images[imageIndex]) return null;
+              const imageData = images[imageIndex];
+              if (!imageData) return null;
 
               const distance = Math.abs(offset);
               const isInFocus = offset === 0;
@@ -96,8 +96,8 @@ const GallerySection = () => {
 
               return (
                 <motion.div
-                  key={imageIndex + offset}
-                  className="absolute w-[65%] aspect-video cursor-pointer"
+                  key={imageData.id}
+                  className="absolute w-[65%] cursor-pointer aspect-[16/9]"
                   initial={false}
                   animate={{
                     x: `${xPercentage}%`,
@@ -105,10 +105,10 @@ const GallerySection = () => {
                     opacity,
                     zIndex,
                   }}
-                  transition={{ type: 'spring', stiffness: 200, damping: 30 }}
+                  transition={{ type: 'spring', stiffness: 200, damping: 25 }}
                   onClick={() => {
                     if (isInFocus) {
-                      setFullscreenImage({ src: images[imageIndex].src, alt: images[imageIndex].alt });
+                      setFullscreenImage({ src: imageData.src, alt: imageData.alt });
                     } else {
                       handleInteraction(() => paginate(offset));
                     }
@@ -116,13 +116,13 @@ const GallerySection = () => {
                 >
                   <div className="relative w-full h-full group">
                     <Image
-                      src={images[imageIndex].src}
-                      alt={images[imageIndex].alt}
+                      src={imageData.src}
+                      alt={imageData.alt}
                       fill
                       sizes="(max-width: 768px) 65vw, 42vw"
-                      quality={isInFocus ? 90 : 75}
+                      quality={isInFocus ? 100 : 80}
                       className="object-cover rounded-lg"
-                      data-ai-hint={images[imageIndex].hint}
+                      data-ai-hint={imageData.hint}
                       priority={isInFocus}
                     />
                     <div className={cn(
@@ -137,13 +137,13 @@ const GallerySection = () => {
             })}
 
             <button
-              onClick={() => handleInteraction(prevImage)}
+              onClick={() => handleInteraction(() => paginate(-1))}
               className="absolute top-1/2 -translate-y-1/2 left-0 md:-left-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
             >
               <ChevronLeft className="h-6 w-6" />
             </button>
             <button
-              onClick={() => handleInteraction(nextImage)}
+              onClick={() => handleInteraction(() => paginate(1))}
               className="absolute top-1/2 -translate-y-1/2 right-0 md:-right-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
             >
               <ChevronRight className="h-6 w-6" />
