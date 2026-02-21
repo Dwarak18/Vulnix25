@@ -12,9 +12,10 @@ const GallerySection = () => {
   const [fullscreenImage, setFullscreenImage] = useState<{src: string; alt: string} | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const totalImages = images.length;
+  const totalImages = Array.isArray(images) ? images.length : 0;
 
   const paginate = (newDirection: number) => {
+    if (totalImages === 0) return;
     setIndex([(index + newDirection + totalImages) % totalImages, newDirection]);
   };
 
@@ -25,11 +26,9 @@ const GallerySection = () => {
   const prevImage = () => {
     paginate(-1);
   };
-  
-  const currentImage = images[index];
-
 
   const startAutoRotate = () => {
+    if (totalImages === 0) return;
     stopAutoRotate(); // Ensure no multiple intervals are running
     intervalRef.current = setInterval(() => {
       paginate(1);
@@ -46,7 +45,7 @@ const GallerySection = () => {
     startAutoRotate();
     return () => stopAutoRotate();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [totalImages]); // Re-run if images are loaded later
 
   const handleInteraction = (action: () => void) => {
     stopAutoRotate();
@@ -70,7 +69,6 @@ const GallerySection = () => {
       opacity: 0,
     }),
   };
-
 
   return (
     <section id="gallery" className="relative py-24 sm:py-32 bg-background/70 backdrop-blur-sm overflow-hidden">
@@ -97,67 +95,77 @@ const GallerySection = () => {
           </p>
         </motion.div>
 
-        <div 
-          className="relative h-[300px] md:h-[500px] w-full max-w-4xl mx-auto"
-          style={{ perspective: '1000px' }}
-          onMouseEnter={stopAutoRotate}
-          onMouseLeave={startAutoRotate}
-        >
-          <AnimatePresence initial={false} custom={direction}>
-            <motion.div
-              key={index}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                rotateY: { type: 'spring', stiffness: 100, damping: 20 },
-                opacity: { duration: 0.2 },
-              }}
-              className="absolute w-full h-full"
-              style={{ transformStyle: 'preserve-3d' }}
-            >
-              <div 
-                className="w-full h-full cursor-pointer group"
-                onClick={() => setFullscreenImage({ src: currentImage.src, alt: currentImage.alt })}
+        {totalImages > 0 ? (
+          <div 
+            className="relative h-[300px] md:h-[500px] w-full max-w-4xl mx-auto"
+            style={{ perspective: '1000px' }}
+            onMouseEnter={stopAutoRotate}
+            onMouseLeave={startAutoRotate}
+          >
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={index}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  rotateY: { type: 'spring', stiffness: 100, damping: 20 },
+                  opacity: { duration: 0.2 },
+                }}
+                className="absolute w-full h-full"
+                style={{ transformStyle: 'preserve-3d' }}
               >
-                <Image
-                  src={currentImage.src}
-                  alt={currentImage.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover rounded-lg"
-                  data-ai-hint={currentImage.hint}
-                  priority={true}
-                />
-                <div className="absolute inset-0 bg-black/20 rounded-lg group-hover:bg-black/10 transition-colors"></div>
-                <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
                 <div 
-                  className="absolute inset-0 rounded-lg"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
-                    content: '""',
-                  }}
-                ></div>
-                <div className="absolute inset-0 rounded-lg box-glow opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                  className="w-full h-full cursor-pointer group"
+                  onClick={() => setFullscreenImage({ src: images[index].src, alt: images[index].alt })}
+                >
+                  <Image
+                    src={images[index].src}
+                    alt={images[index].alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover rounded-lg"
+                    data-ai-hint={images[index].hint}
+                    priority={true}
+                  />
+                  <div className="absolute inset-0 bg-black/20 rounded-lg group-hover:bg-black/10 transition-colors"></div>
+                  <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
+                  <div 
+                    className="absolute inset-0 rounded-lg"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%)',
+                      content: '""',
+                    }}
+                  ></div>
+                  <div className="absolute inset-0 rounded-lg box-glow opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
 
-          <button
-            onClick={() => handleInteraction(prevImage)}
-            className="absolute top-1/2 -translate-y-1/2 left-0 md:-left-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-          <button
-            onClick={() => handleInteraction(nextImage)}
-            className="absolute top-1/2 -translate-y-1/2 right-0 md:-right-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        </div>
+            <button
+              onClick={() => handleInteraction(prevImage)}
+              className="absolute top-1/2 -translate-y-1/2 left-0 md:-left-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+              onClick={() => handleInteraction(nextImage)}
+              className="absolute top-1/2 -translate-y-1/2 right-0 md:-right-16 z-20 p-2 bg-card/50 rounded-full hover:bg-card transition-colors"
+            >
+              <ChevronRight className="h-6 w-6" />
+            </button>
+          </div>
+        ) : (
+          <div className="relative h-[300px] md:h-[500px] w-full max-w-4xl mx-auto flex items-center justify-center bg-card/20 rounded-lg border border-dashed border-border">
+            <p className="text-muted-foreground text-center">
+              Gallery images not found.
+              <br />
+              Please add images to <code className="bg-muted px-1.5 py-1 rounded-sm text-xs">public/gallery</code> and run <code className="bg-muted px-1.5 py-1 rounded-sm text-xs">npm run rename:gallery</code>.
+            </p>
+          </div>
+        )}
       </div>
       
       <Dialog open={!!fullscreenImage} onOpenChange={() => setFullscreenImage(null)}>

@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const galleryDir = path.join(__dirname, '../public/gallery');
+const jsonPath = path.join(__dirname, '../src/lib/placeholder-images.json');
 
 try {
   const files = fs.readdirSync(galleryDir);
@@ -14,12 +15,16 @@ try {
   });
 
   if (imageFiles.length === 0) {
-    console.log('No image files found in /public/gallery. Nothing to rename.');
+    console.log('No image files found in /public/gallery. Nothing to rename or update.');
+    // Optionally, write an empty array to the JSON file
+    fs.writeFileSync(jsonPath, JSON.stringify([], null, 2));
+    console.log('src/lib/placeholder-images.json has been cleared.');
     return;
   }
 
-  console.log(`Found ${imageFiles.length} images to rename.`);
+  console.log(`Found ${imageFiles.length} images to process.`);
 
+  const newImageList = [];
   let counter = 1;
   // Sort files to ensure a consistent renaming order
   for (const file of imageFiles.sort()) {
@@ -33,17 +38,34 @@ try {
         fs.renameSync(oldPath, newPath);
         console.log(`Renamed: ${file} -> ${newName}`);
       } else {
-        console.log(`Skipped: ${file} is already correctly named.`);
+        console.log(`Skipped renaming: ${file} is already correctly named.`);
       }
+
+      // Add to our new JSON list
+      newImageList.push({
+        id: counter,
+        src: `/gallery/${newName}`,
+        alt: `VULNIX Event Image ${counter}`,
+        // A generic hint, can be improved manually later
+        hint: `event photo`
+      });
+
       counter++;
     } catch (renameError) {
-      console.error(`Error renaming ${file}:`, renameError);
+      console.error(`Error processing ${file}:`, renameError);
     }
   }
 
-  console.log('\nImage renaming process completed.');
-  console.log('Please check the /public/gallery directory to see the changes.');
-  console.log('I have also updated src/lib/placeholder-images.json to match the new filenames.');
+  // Write the updated list to the JSON file
+  try {
+    fs.writeFileSync(jsonPath, JSON.stringify(newImageList, null, 2));
+    console.log(`\nSuccessfully updated src/lib/placeholder-images.json with ${newImageList.length} entries.`);
+  } catch (writeError) {
+    console.error('\nError writing to src/lib/placeholder-images.json:', writeError);
+  }
+
+  console.log('\nImage processing complete.');
+  console.log('Please check the /public/gallery directory and the updated JSON file.');
 
 } catch (err) {
   if (err.code === 'ENOENT') {
