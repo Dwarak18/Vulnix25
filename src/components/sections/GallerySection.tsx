@@ -5,26 +5,35 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import images from '@/lib/placeholder-images.json';
-import { cn } from '@/lib/utils';
 import AnimatedGridPattern from '../common/AnimatedGridPattern';
 
 const GallerySection = () => {
-  const [index, setIndex] = useState(0);
+  const [[index, direction], setIndex] = useState([0, 0]);
   const [fullscreenImage, setFullscreenImage] = useState<{src: string; alt: string} | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const totalImages = images.length;
 
-  const nextImage = () => {
-    setIndex((prevIndex) => (prevIndex + 1) % totalImages);
+  const paginate = (newDirection: number) => {
+    setIndex([(index + newDirection + totalImages) % totalImages, newDirection]);
   };
 
-  const prevImage = () => {
-    setIndex((prevIndex) => (prevIndex - 1 + totalImages) % totalImages);
+  const nextImage = () => {
+    paginate(1);
   };
+  
+  const prevImage = () => {
+    paginate(-1);
+  };
+  
+  const currentImage = images[index];
+
 
   const startAutoRotate = () => {
-    intervalRef.current = setInterval(nextImage, 4000);
+    stopAutoRotate(); // Ensure no multiple intervals are running
+    intervalRef.current = setInterval(() => {
+      paginate(1);
+    }, 4000);
   };
 
   const stopAutoRotate = () => {
@@ -44,6 +53,24 @@ const GallerySection = () => {
     action();
     startAutoRotate();
   };
+
+  const variants = {
+    enter: (direction: number) => ({
+      rotateY: direction > 0 ? 90 : -90,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      rotateY: 0,
+      opacity: 1,
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      rotateY: direction < 0 ? 90 : -90,
+      opacity: 0,
+    }),
+  };
+
 
   return (
     <section id="gallery" className="relative py-24 sm:py-32 bg-background/70 backdrop-blur-sm overflow-hidden">
@@ -76,27 +103,33 @@ const GallerySection = () => {
           onMouseEnter={stopAutoRotate}
           onMouseLeave={startAutoRotate}
         >
-          <AnimatePresence initial={false}>
+          <AnimatePresence initial={false} custom={direction}>
             <motion.div
               key={index}
+              custom={direction}
+              variants={variants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                rotateY: { type: 'spring', stiffness: 100, damping: 20 },
+                opacity: { duration: 0.2 },
+              }}
               className="absolute w-full h-full"
               style={{ transformStyle: 'preserve-3d' }}
-              initial={{ rotateY: index > (index - 1 + totalImages) % totalImages ? -90 : 90, opacity: 0 }}
-              animate={{ rotateY: 0, opacity: 1 }}
-              exit={{ rotateY: index > (index + 1) % totalImages ? 90 : -90, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 100, damping: 20 }}
             >
               <div 
                 className="w-full h-full cursor-pointer group"
-                onClick={() => setFullscreenImage({ src: images[index].src, alt: images[index].alt })}
+                onClick={() => setFullscreenImage({ src: currentImage.src, alt: currentImage.alt })}
               >
                 <Image
-                  src={images[index].src}
-                  alt={images[index].alt}
+                  src={currentImage.src}
+                  alt={currentImage.alt}
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover rounded-lg"
-                  data-ai-hint={images[index].hint}
+                  data-ai-hint={currentImage.hint}
+                  priority={true}
                 />
                 <div className="absolute inset-0 bg-black/20 rounded-lg group-hover:bg-black/10 transition-colors"></div>
                 <div className="absolute inset-0 rounded-lg ring-1 ring-inset ring-border/20"></div>
