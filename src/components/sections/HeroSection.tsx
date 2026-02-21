@@ -3,7 +3,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowDown, CheckBadgeIcon } from '@heroicons/react/24/solid';
 import AnimatedGridPattern from '../common/AnimatedGridPattern';
 import AnimatedCounter from '../common/AnimatedCounter';
 import { Badge } from '../ui/badge';

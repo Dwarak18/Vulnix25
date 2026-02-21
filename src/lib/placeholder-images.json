@@ -2,133 +2,133 @@
   {
     "id": 1,
     "src": "/gallery/vulnix-gallery-1.jpeg",
-    "alt": "VULNIX Event Image 1 - Cybersecurity Event",
-    "hint": "cybersecurity event"
+    "alt": "VULNIX Event Image 1",
+    "hint": "event photo"
   },
   {
     "id": 2,
     "src": "/gallery/vulnix-gallery-2.jpeg",
-    "alt": "VULNIX Event Image 2 - Students Presenting",
-    "hint": "students presentation"
+    "alt": "VULNIX Event Image 2",
+    "hint": "event photo"
   },
   {
     "id": 3,
     "src": "/gallery/vulnix-gallery-3.jpeg",
-    "alt": "VULNIX Event Image 3 - Coding Competition",
-    "hint": "coding competition"
+    "alt": "VULNIX Event Image 3",
+    "hint": "event photo"
   },
   {
     "id": 4,
     "src": "/gallery/vulnix-gallery-4.jpeg",
-    "alt": "VULNIX Event Image 4 - Tech Talk",
-    "hint": "tech talk"
+    "alt": "VULNIX Event Image 4",
+    "hint": "event photo"
   },
   {
     "id": 5,
     "src": "/gallery/vulnix-gallery-5.jpeg",
-    "alt": "VULNIX Event Image 5 - Audience Listening",
-    "hint": "audience listening"
+    "alt": "VULNIX Event Image 5",
+    "hint": "event photo"
   },
   {
     "id": 6,
     "src": "/gallery/vulnix-gallery-6.jpeg",
-    "alt": "VULNIX Event Image 6 - Panel Discussion",
-    "hint": "panel discussion"
+    "alt": "VULNIX Event Image 6",
+    "hint": "event photo"
   },
   {
     "id": 7,
     "src": "/gallery/vulnix-gallery-7.jpeg",
-    "alt": "VULNIX Event Image 7 - Inauguration Ceremony",
-    "hint": "inauguration ceremony"
+    "alt": "VULNIX Event Image 7",
+    "hint": "event photo"
   },
   {
     "id": 8,
     "src": "/gallery/vulnix-gallery-8.jpeg",
-    "alt": "VULNIX Event Image 8 - Award Ceremony",
-    "hint": "award ceremony"
+    "alt": "VULNIX Event Image 8",
+    "hint": "event photo"
   },
   {
     "id": 9,
     "src": "/gallery/vulnix-gallery-9.jpeg",
-    "alt": "VULNIX Event Image 9 - Networking Students",
-    "hint": "networking students"
+    "alt": "VULNIX Event Image 9",
+    "hint": "event photo"
   },
   {
     "id": 10,
     "src": "/gallery/vulnix-gallery-10.jpeg",
-    "alt": "VULNIX Event Image 10 - Hacking Challenge",
-    "hint": "hacking challenge"
+    "alt": "VULNIX Event Image 10",
+    "hint": "event photo"
   },
   {
     "id": 11,
     "src": "/gallery/vulnix-gallery-11.jpeg",
-    "alt": "VULNIX Event Image 11 - Keynote Speaker",
-    "hint": "keynote speaker"
+    "alt": "VULNIX Event Image 11",
+    "hint": "event photo"
   },
   {
     "id": 12,
     "src": "/gallery/vulnix-gallery-12.jpeg",
-    "alt": "VULNIX Event Image 12 - Workshop Session",
-    "hint": "workshop session"
+    "alt": "VULNIX Event Image 12",
+    "hint": "event photo"
   },
   {
     "id": 13,
     "src": "/gallery/vulnix-gallery-13.jpeg",
-    "alt": "VULNIX Event Image 13 - Event Branding",
-    "hint": "event branding"
+    "alt": "VULNIX Event Image 13",
+    "hint": "event photo"
   },
   {
     "id": 14,
     "src": "/gallery/vulnix-gallery-14.jpeg",
-    "alt": "VULNIX Event Image 14 - Symposium Hall",
-    "hint": "symposium hall"
+    "alt": "VULNIX Event Image 14",
+    "hint": "event photo"
   },
   {
     "id": 15,
     "src": "/gallery/vulnix-gallery-15.jpeg",
-    "alt": "VULNIX Event Image 15 - Group Photo",
-    "hint": "group photo"
+    "alt": "VULNIX Event Image 15",
+    "hint": "event photo"
   },
   {
     "id": 16,
     "src": "/gallery/vulnix-gallery-16.jpeg",
-    "alt": "VULNIX Event Image 16 - Students Competing",
-    "hint": "students competing"
+    "alt": "VULNIX Event Image 16",
+    "hint": "event photo"
   },
   {
     "id": 17,
     "src": "/gallery/vulnix-gallery-17.jpeg",
-    "alt": "VULNIX Event Image 17 - Judges Panel",
-    "hint": "judges panel"
+    "alt": "VULNIX Event Image 17",
+    "hint": "event photo"
   },
   {
     "id": 18,
     "src": "/gallery/vulnix-gallery-18.jpeg",
-    "alt": "VULNIX Event Image 18 - Crowd Shot",
-    "hint": "crowd shot"
+    "alt": "VULNIX Event Image 18",
+    "hint": "event photo"
   },
   {
     "id": 19,
     "src": "/gallery/vulnix-gallery-19.jpeg",
-    "alt": "VULNIX Event Image 19 - Interactive Session",
-    "hint": "interactive session"
+    "alt": "VULNIX Event Image 19",
+    "hint": "event photo"
   },
   {
     "id": 20,
     "src": "/gallery/vulnix-gallery-20.jpeg",
-    "alt": "VULNIX Event Image 20 - Event Banner",
-    "hint": "event banner"
+    "alt": "VULNIX Event Image 20",
+    "hint": "event photo"
   },
   {
     "id": 21,
     "src": "/gallery/vulnix-gallery-21.jpeg",
-    "alt": "VULNIX Event Image 21 - Participant Badge",
-    "hint": "participant badge"
+    "alt": "VULNIX Event Image 21",
+    "hint": "event photo"
   },
   {
     "id": 22,
     "src": "/gallery/vulnix-gallery-22.jpeg",
-    "alt": "VULNIX Event Image 22 - Closing Ceremony",
-    "hint": "closing ceremony"
+    "alt": "VULNIX Event Image 22",
+    "hint": "event photo"
   }
 ]
