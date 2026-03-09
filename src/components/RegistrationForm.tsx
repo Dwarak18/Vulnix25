@@ -16,7 +16,7 @@ import { useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Flame } from 'lucide-react';
+import { Flame, Sparkles, Key } from 'lucide-react';
 
 const memberSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -126,32 +126,36 @@ export const RegistrationForm: React.FC = () => {
   }
 
   return (
-    <section id="registration" className="py-32 px-4 relative overflow-hidden">
+    <section id="registration" className="py-48 px-4 relative overflow-hidden bg-black/40">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-5xl md:text-7xl mb-6 text-primary font-headline">The Celestial Register</h2>
-          <p className="text-muted-foreground text-lg italic">"Ink your name upon the immortal scroll and face your destiny."</p>
-          <div className="mt-8 inline-block px-8 py-4 ornate-border bg-primary/5 text-primary font-headline text-2xl tracking-widest">
-            TEMPLE KEY: {teamId}
+        <div className="text-center mb-24">
+          <h2 className="text-5xl md:text-8xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">Temple of Records</h2>
+          <p className="text-muted-foreground text-xl italic font-body">"Ink your name upon the immortal scroll and face your destiny."</p>
+          <div className="mt-12 inline-flex items-center gap-6 px-10 py-6 ornate-border bg-primary/5 text-primary font-headline text-2xl tracking-[0.2em] shadow-gold-glow">
+            <Key className="animate-pulse" />
+            KEY: {teamId}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
-          <Card className="stone-tablet border-primary/30 p-8">
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              <div className="space-y-3">
-                <Label className="text-primary font-headline tracking-widest uppercase">Team Moniker</Label>
-                <Input {...register("teamName")} className="bg-black/60 border-primary/20 focus:border-primary h-12 text-lg" placeholder="e.g. Shadow Walkers" />
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-16">
+          <Card className="stone-tablet border-primary/40 p-10 md:p-16 ornate-border">
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-12">
+              <div className="space-y-4">
+                <Label className="text-primary font-headline tracking-widest uppercase text-sm block">Team Moniker</Label>
+                <div className="relative">
+                  <Input {...register("teamName")} className="bg-black/60 border-primary/30 focus:border-primary h-14 text-xl tracking-wider pl-4" placeholder="e.g. Shadow Walkers" />
+                  <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
+                </div>
                 {errors.teamName && <p className="text-secondary text-sm italic">{errors.teamName.message}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label className="text-primary font-headline tracking-widest uppercase">Select Trial</Label>
+              <div className="space-y-4">
+                <Label className="text-primary font-headline tracking-widest uppercase text-sm block">Select Trial</Label>
                 <Select onValueChange={(v) => setValue("eventSelection", v)}>
-                  <SelectTrigger className="bg-black/60 border-primary/20 h-12 text-lg">
+                  <SelectTrigger className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider">
                     <SelectValue placeholder="Choose Path" />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/30 font-headline">
+                  <SelectContent className="bg-card border-primary/40 font-headline">
                     <SelectItem value="ctf">Capture The Flag</SelectItem>
                     <SelectItem value="prompt">Prompt Engineering</SelectItem>
                     <SelectItem value="expo">Paper Expo</SelectItem>
@@ -162,13 +166,13 @@ export const RegistrationForm: React.FC = () => {
                 {errors.eventSelection && <p className="text-secondary text-sm italic">{errors.eventSelection.message}</p>}
               </div>
 
-              <div className="space-y-3">
-                <Label className="text-primary font-headline tracking-widest uppercase">Disciple Count</Label>
+              <div className="space-y-4">
+                <Label className="text-primary font-headline tracking-widest uppercase text-sm block">Disciple Count</Label>
                 <Select value={teamSize} onValueChange={(v) => setValue("teamSize", v)}>
-                  <SelectTrigger className="bg-black/60 border-primary/20 h-12 text-lg">
+                  <SelectTrigger className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/30 font-headline">
+                  <SelectContent className="bg-card border-primary/40 font-headline">
                     {["1", "2", "3", "4", "5"].map(s => (
                       <SelectItem key={s} value={s}>{s} Disciple{parseInt(s) > 1 ? 's' : ''}</SelectItem>
                     ))}
@@ -178,38 +182,38 @@ export const RegistrationForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {fields.map((field, index) => (
-              <Card key={field.id} className="stone-tablet border-accent/30 animate-in fade-in zoom-in-95 duration-500">
-                <CardHeader className="border-b border-accent/20">
-                  <CardTitle className="text-xl text-primary font-headline tracking-widest flex items-center gap-3">
-                    <Flame size={18} className="text-secondary" />
+              <Card key={field.id} className="stone-tablet border-accent/40 animate-in fade-in zoom-in-95 duration-700">
+                <CardHeader className="border-b border-accent/20 bg-primary/5 p-6">
+                  <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
+                    <Flame size={24} className="text-secondary animate-pulse" />
                     Disciple {index + 1}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6 pt-6">
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">True Name</Label>
-                    <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/20 h-10" />
+                <CardContent className="space-y-8 pt-8 p-8">
+                  <div className="space-y-3">
+                    <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">True Name</Label>
+                    <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 focus:border-primary transition-colors" />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Spirit Signal (Phone)</Label>
-                      <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/20 h-10" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Spirit Signal</Label>
+                      <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12" />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Digital Echo (Email)</Label>
-                      <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/20 h-10" />
+                    <div className="space-y-3">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Digital Echo</Label>
+                      <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Academy (College)</Label>
-                      <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/20 h-10" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Academy</Label>
+                      <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12" />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Discipline (Dept)</Label>
-                      <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/20 h-10" />
+                    <div className="space-y-3">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Discipline</Label>
+                      <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12" />
                     </div>
                   </div>
                 </CardContent>
@@ -217,11 +221,11 @@ export const RegistrationForm: React.FC = () => {
             ))}
           </div>
 
-          <div className="text-center pt-12">
+          <div className="text-center pt-20">
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/80 text-black font-black px-16 py-10 text-2xl ornate-border shadow-gold-glow rounded-none transition-all w-full md:w-auto hover:scale-105"
+              className="bg-primary hover:bg-primary/80 text-black font-black px-24 py-12 text-3xl ornate-border shadow-[0_0_50px_rgba(200,155,60,0.3)] rounded-none transition-all w-full md:w-auto hover:scale-105 active:scale-95"
             >
               {isSubmitting ? "TRANSCENDING..." : "SEAL THE SCROLL"}
             </Button>

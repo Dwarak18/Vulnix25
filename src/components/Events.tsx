@@ -60,60 +60,72 @@ const NON_TECH_EVENTS = [
 
 export const Events: React.FC = () => {
   return (
-    <section id="events" className="py-32 px-4 relative">
+    <section id="events" className="py-48 px-4 relative">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-24">
-          <div className="inline-block p-2 bg-secondary/10 rounded-full mb-4">
-             <Scroll className="text-primary animate-pulse" size={32} />
+        <div className="text-center mb-32">
+          <div className="inline-block p-4 bg-primary/5 rounded-full mb-6 border border-primary/20">
+             <Scroll className="text-primary animate-pulse" size={48} />
           </div>
-          <h2 className="text-5xl md:text-8xl mb-6 text-primary font-headline">The Great Trials</h2>
-          <p className="text-muted-foreground text-xl font-body italic">"Choose your path carefully, for each trial demands a different part of your spirit."</p>
+          <h2 className="text-5xl md:text-8xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">The Great Trials</h2>
+          <p className="text-muted-foreground text-2xl font-body italic max-w-3xl mx-auto">
+            "Choose your path carefully, for each trial demands a different part of your spirit."
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
           {/* Tech Events */}
-          <div className="space-y-10">
-            <div className="flex items-center gap-6 mb-12">
-              <div className="h-0.5 flex-grow bg-gradient-to-r from-transparent to-primary/50" />
-              <h3 className="text-4xl font-headline text-primary">Technical Sagas</h3>
-              <div className="h-0.5 w-12 bg-primary/50" />
+          <div className="space-y-12">
+            <div className="flex items-center gap-8 mb-16">
+              <div className="h-[2px] flex-grow bg-gradient-to-r from-transparent to-primary/60" />
+              <h3 className="text-4xl md:text-5xl font-headline text-primary tracking-widest">Technical Sagas</h3>
+              <div className="h-[2px] w-16 bg-primary/60" />
             </div>
-            <div className="grid gap-8">
+            <div className="grid gap-10">
               {TECH_EVENTS.map((event, idx) => (
-                <Card key={idx} className="stone-tablet border-primary/20 hover:border-primary/60 transition-all duration-500 group hover:-translate-y-1">
-                  <CardHeader className="flex flex-row items-center gap-6 pb-4">
-                    <div className="p-4 bg-primary/5 border border-primary/20 rounded-sm group-hover:bg-primary/20 transition-all text-primary">
+                <Card key={idx} className="stone-tablet border-primary/20 hover:border-primary/80 transition-all duration-700 group hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(200,155,60,0.15)]">
+                  <CardHeader className="flex flex-row items-center gap-8 pb-4">
+                    <div className="p-5 bg-primary/5 border border-primary/20 rounded-sm group-hover:bg-primary/20 transition-all text-primary shadow-inner">
                       {event.icon}
                     </div>
-                    <CardTitle className="text-2xl font-headline group-hover:text-primary transition-colors tracking-widest">{event.title}</CardTitle>
+                    <CardTitle className="text-2xl md:text-3xl font-headline group-hover:text-primary transition-colors tracking-widest gold-glow-text">
+                      {event.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground font-body text-lg leading-relaxed">{event.desc}</p>
                   </CardContent>
+                  <div className="absolute bottom-0 right-0 p-2 opacity-5 group-hover:opacity-20 transition-opacity">
+                    <Shield size={64} className="text-primary" />
+                  </div>
                 </Card>
               ))}
             </div>
           </div>
 
           {/* Non-Tech Events */}
-          <div className="space-y-10">
-            <div className="flex items-center gap-6 mb-12">
-              <div className="h-0.5 w-12 bg-secondary/50" />
-              <h3 className="text-4xl font-headline text-secondary">Creative Realms</h3>
-              <div className="h-0.5 flex-grow bg-gradient-to-l from-transparent to-secondary/50" />
+          <div className="space-y-12">
+            <div className="flex items-center gap-8 mb-16">
+              <div className="h-[2px] w-16 bg-secondary/60" />
+              <h3 className="text-4xl md:text-5xl font-headline text-secondary tracking-widest">Creative Realms</h3>
+              <div className="h-[2px] flex-grow bg-gradient-to-l from-transparent to-secondary/60" />
             </div>
-            <div className="grid gap-8">
+            <div className="grid gap-10">
               {NON_TECH_EVENTS.map((event, idx) => (
-                <Card key={idx} className="stone-tablet border-secondary/20 hover:border-secondary/60 transition-all duration-500 group hover:-translate-y-1">
-                  <CardHeader className="flex flex-row items-center gap-6 pb-4">
-                    <div className="p-4 bg-secondary/5 border border-secondary/20 rounded-sm group-hover:bg-secondary/20 transition-all text-secondary">
+                <Card key={idx} className="stone-tablet border-secondary/20 hover:border-secondary/80 transition-all duration-700 group hover:-translate-y-2 hover:shadow-[0_0_40px_rgba(122,30,30,0.15)]">
+                  <CardHeader className="flex flex-row items-center gap-8 pb-4">
+                    <div className="p-5 bg-secondary/5 border border-secondary/20 rounded-sm group-hover:bg-secondary/20 transition-all text-secondary shadow-inner">
                       {event.icon}
                     </div>
-                    <CardTitle className="text-2xl font-headline group-hover:text-secondary transition-colors tracking-widest">{event.title}</CardTitle>
+                    <CardTitle className="text-2xl md:text-3xl font-headline group-hover:text-secondary transition-colors tracking-widest">
+                      {event.title}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground font-body text-lg leading-relaxed">{event.desc}</p>
                   </CardContent>
+                  <div className="absolute bottom-0 right-0 p-2 opacity-5 group-hover:opacity-20 transition-opacity">
+                    <Scroll size={64} className="text-secondary" />
+                  </div>
                 </Card>
               ))}
             </div>
