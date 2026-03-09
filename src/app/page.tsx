@@ -7,6 +7,7 @@ import { About } from '@/components/About';
 import { Events } from '@/components/Events';
 import { RegistrationForm } from '@/components/RegistrationForm';
 import { FogPortal } from '@/components/FogPortal';
+import { BackgroundRunes } from '@/components/BackgroundRunes';
 import { Toaster } from '@/components/ui/toaster';
 
 export default function Home() {
@@ -37,6 +38,9 @@ export default function Home() {
 
       {/* Immersive 3D Background */}
       <ThreeScene />
+      
+      {/* Atmospheric Background Elements */}
+      <BackgroundRunes />
       
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
