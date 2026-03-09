@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -183,42 +184,57 @@ export const RegistrationForm: React.FC = () => {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {fields.map((field, index) => (
-              <Card key={field.id} className="stone-tablet border-accent/40 animate-in fade-in zoom-in-95 duration-700">
-                <CardHeader className="border-b border-accent/20 bg-primary/5 p-6">
-                  <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
-                    <Flame size={24} className="text-secondary animate-pulse" />
-                    Disciple {index + 1}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-8 pt-8 p-8">
-                  <div className="space-y-3">
-                    <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">True Name</Label>
-                    <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 focus:border-primary transition-colors" />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Spirit Signal</Label>
-                      <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12" />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Digital Echo</Label>
-                      <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Academy</Label>
-                      <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12" />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Discipline</Label>
-                      <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <AnimatePresence mode="popLayout">
+              {fields.map((field, index) => (
+                <motion.div
+                  key={field.id}
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  transition={{ 
+                    duration: 0.5, 
+                    ease: [0.16, 1, 0.3, 1],
+                    delay: (index % 2) * 0.1 
+                  }}
+                  className="w-full"
+                >
+                  <Card className="stone-tablet border-accent/40 shadow-gold-glow overflow-hidden transition-shadow duration-500 hover:shadow-[0_0_30px_rgba(200,155,60,0.15)]">
+                    <CardHeader className="border-b border-accent/20 bg-primary/5 p-6">
+                      <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
+                        <Flame size={24} className="text-secondary animate-pulse" />
+                        Disciple {index + 1}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-8 pt-8 p-8">
+                      <div className="space-y-3">
+                        <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">True Name</Label>
+                        <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 focus:border-primary transition-colors" />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Spirit Signal</Label>
+                          <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Digital Echo</Label>
+                          <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Academy</Label>
+                          <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12" />
+                        </div>
+                        <div className="space-y-3">
+                          <Label className="text-xs uppercase tracking-widest text-muted-foreground font-headline">Discipline</Label>
+                          <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           <div className="text-center pt-20">
