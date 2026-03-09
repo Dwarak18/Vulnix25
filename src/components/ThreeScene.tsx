@@ -11,73 +11,103 @@ export const ThreeScene: React.FC = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.1);
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.15);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
+    camera.position.z = 6;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Staff creation (Simplified version for performance)
+    // Ruyi Jingu Bang (Golden Hoop Staff)
     const staffGroup = new THREE.Group();
     
-    // Main staff body
-    const staffGeo = new THREE.CylinderGeometry(0.05, 0.05, 4, 32);
+    // Main staff body (Iron)
+    const staffGeo = new THREE.CylinderGeometry(0.08, 0.08, 4.5, 32);
     const staffMat = new THREE.MeshStandardMaterial({ 
-      color: 0xffc100, 
-      metalness: 0.9, 
-      roughness: 0.1,
-      emissive: 0xffc100,
-      emissiveIntensity: 0.2
+      color: 0x1a1a1a, 
+      metalness: 1, 
+      roughness: 0.4,
     });
     const staff = new THREE.Mesh(staffGeo, staffMat);
     staffGroup.add(staff);
 
-    // Staff ends
-    const endGeo = new THREE.TorusGeometry(0.15, 0.03, 16, 100);
-    const endMat = new THREE.MeshStandardMaterial({ color: 0xffc100, metalness: 1 });
+    // Golden Hoops (Ends)
+    const hoopGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.6, 32);
+    const hoopMat = new THREE.MeshStandardMaterial({ 
+      color: 0xc89b3c, 
+      metalness: 1, 
+      roughness: 0.1,
+      emissive: 0xc89b3c,
+      emissiveIntensity: 0.2
+    });
     
-    const topEnd = new THREE.Mesh(endGeo, endMat);
-    topEnd.position.y = 2;
-    topEnd.rotation.x = Math.PI / 2;
-    staffGroup.add(topEnd);
+    const topHoop = new THREE.Mesh(hoopGeo, hoopMat);
+    topHoop.position.y = 1.95;
+    staffGroup.add(topHoop);
 
-    const bottomEnd = topEnd.clone();
-    bottomEnd.position.y = -2;
-    staffGroup.add(bottomEnd);
+    const bottomHoop = topHoop.clone();
+    bottomHoop.position.y = -1.95;
+    staffGroup.add(bottomHoop);
+
+    // Ornate engravings (simplified as torus rings)
+    const ringGeo = new THREE.TorusGeometry(0.14, 0.02, 16, 100);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0xc89b3c, metalness: 1 });
+    
+    for (let i = 0; i < 4; i++) {
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.y = 1.7 + (i * 0.1);
+      ring.rotation.x = Math.PI / 2;
+      staffGroup.add(ring);
+      
+      const bRing = ring.clone();
+      bRing.position.y = -1.7 - (i * 0.1);
+      staffGroup.add(bRing);
+    }
 
     scene.add(staffGroup);
 
-    // Embers
-    const emberCount = 500;
-    const emberGeo = new THREE.BufferGeometry();
-    const emberPos = new Float32Array(emberCount * 3);
-    for (let i = 0; i < emberCount * 3; i++) {
-      emberPos[i] = (Math.random() - 0.5) * 15;
+    // Ash / Embers Particles
+    const particleCount = 800;
+    const particleGeo = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      velocities[i] = 0.005 + Math.random() * 0.01;
     }
-    emberGeo.setAttribute('position', new THREE.BufferAttribute(emberPos, 3));
-    const emberMat = new THREE.PointsMaterial({
-      color: 0xffc100,
-      size: 0.03,
+
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xc89b3c,
+      size: 0.04,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending
     });
-    const embers = new THREE.Points(emberGeo, emberMat);
-    scene.add(embers);
+    
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
 
-    // Lights
+    // Lighting
     const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
     scene.add(ambientLight);
 
-    const pointLight = new THREE.PointLight(0xffc100, 2, 10);
-    pointLight.position.set(2, 2, 2);
-    scene.add(pointLight);
+    const primaryLight = new THREE.PointLight(0xc89b3c, 5, 20);
+    primaryLight.position.set(2, 2, 4);
+    scene.add(primaryLight);
 
-    // Animation & Resize
+    const rimLight = new THREE.DirectionalLight(0x7a1e1e, 1);
+    rimLight.position.set(-5, 0, -5);
+    scene.add(rimLight);
+
+    // Animation loop
     let scrollY = 0;
     const onScroll = () => {
       scrollY = window.scrollY;
@@ -87,26 +117,25 @@ export const ThreeScene: React.FC = () => {
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // Staff animations
-      staffGroup.rotation.y += 0.01;
-      staffGroup.rotation.z = Math.sin(Date.now() * 0.001) * 0.1;
-      staffGroup.position.y = Math.sin(Date.now() * 0.002) * 0.2;
+      // Staff rotation and hover
+      staffGroup.rotation.y += 0.005;
+      staffGroup.rotation.z = Math.sin(Date.now() * 0.001) * 0.05;
+      staffGroup.position.y = Math.sin(Date.now() * 0.0015) * 0.15;
 
-      // Scroll reactions
-      camera.position.y = -scrollY * 0.005;
-      camera.lookAt(0, -scrollY * 0.005, 0);
+      // Parallax effect
+      camera.position.y = -scrollY * 0.003;
+      camera.lookAt(0, -scrollY * 0.003, 0);
       
-      staffGroup.rotation.x = scrollY * 0.001;
+      staffGroup.rotation.x = scrollY * 0.0005;
 
-      // Embers animation
-      const positions = emberGeo.attributes.position.array as Float32Array;
-      for (let i = 0; i < emberCount; i++) {
-        const idx = i * 3;
-        positions[idx + 1] += 0.01; // Rise up
-        if (positions[idx + 1] > 7.5) positions[idx + 1] = -7.5;
-        positions[idx] += Math.sin(Date.now() * 0.001 + i) * 0.002;
+      // Particles animation
+      const pPos = particleGeo.attributes.position.array as Float32Array;
+      for (let i = 0; i < particleCount; i++) {
+        pPos[i * 3 + 1] += velocities[i];
+        if (pPos[i * 3 + 1] > 10) pPos[i * 3 + 1] = -10;
+        pPos[i * 3] += Math.sin(Date.now() * 0.0005 + i) * 0.002;
       }
-      emberGeo.attributes.position.needsUpdate = true;
+      particleGeo.attributes.position.needsUpdate = true;
 
       renderer.render(scene, camera);
     };
@@ -124,8 +153,9 @@ export const ThreeScene: React.FC = () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', handleResize);
       containerRef.current?.removeChild(renderer.domElement);
+      renderer.dispose();
     };
   }, []);
 
-  return <div ref={containerRef} className="fixed inset-0 -z-10 bg-black" />;
+  return <div ref={containerRef} className="fixed inset-0 -z-10" />;
 };

@@ -2,18 +2,19 @@ import React from 'react';
 
 export const About: React.FC = () => {
   return (
-    <section id="about" className="relative py-24 px-4 bg-background/50">
+    <section id="about" className="relative py-32 px-4">
       <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-6xl mb-12 text-primary font-bold">The Legend</h2>
-        <div className="relative p-8 md:p-12 gold-border bg-card/40 backdrop-blur-sm">
-          <p className="text-xl md:text-2xl leading-relaxed text-muted-foreground">
-            VULNIX 2.0 is a cybersecurity and innovation symposium where participants challenge themselves through hacking puzzles, AI competitions, technical presentations, and creative contests. 
+        <h2 className="text-4xl md:text-6xl mb-16 text-primary font-headline">The Ancient Accord</h2>
+        <div className="stone-tablet p-12 md:p-20 ornate-border">
+          <p className="text-xl md:text-2xl leading-relaxed text-muted-foreground font-body mb-8">
+            VULNIX 2.0 is more than a symposium; it is a sacred gathering of the most disciplined minds. In this realm, the digital and the mythological converge.
           </p>
-          <p className="mt-8 text-xl md:text-2xl leading-relaxed text-muted-foreground font-headline italic">
-            Inspired by the mythological journey of the Monkey King, every participant faces trials of intelligence, creativity, and strategy.
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-primary/30 to-transparent my-10" />
+          <p className="text-2xl md:text-3xl leading-relaxed text-primary font-headline italic tracking-wide">
+            "True mastery is not found in the tools one wields, but in the spirit that guides them through the shadow."
           </p>
-          <div className="absolute -top-4 -left-4 w-12 h-12 border-t-2 border-l-2 border-primary" />
-          <div className="absolute -bottom-4 -right-4 w-12 h-12 border-b-2 border-r-2 border-primary" />
+          <div className="absolute top-4 left-4 text-primary/20 text-6xl select-none font-headline">智</div>
+          <div className="absolute bottom-4 right-4 text-primary/20 text-6xl select-none font-headline">勇</div>
         </div>
       </div>
     </section>

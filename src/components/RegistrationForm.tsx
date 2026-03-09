@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +16,7 @@ import { useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { Flame } from 'lucide-react';
 
 const memberSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -107,13 +107,13 @@ export const RegistrationForm: React.FC = () => {
 
       setSubmittedData(registrationData);
       toast({
-        title: "Registration Initialized",
-        description: "Proceed to payment to finalize your entry.",
+        title: "Inscription Noted",
+        description: "Your journey begins. Finalize the tribute.",
       });
     } catch (error) {
       toast({
-        title: "Submission Error",
-        description: "Failed to initialize registration. Please try again.",
+        title: "Trial Interrupted",
+        description: "The spirits are silent. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -126,32 +126,32 @@ export const RegistrationForm: React.FC = () => {
   }
 
   return (
-    <section id="registration" className="py-24 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-5xl mb-4 text-primary">Enter the Fray</h2>
-          <p className="text-muted-foreground">Register your team for the symposium</p>
-          <div className="mt-4 inline-block px-4 py-2 border border-primary/30 bg-primary/5 text-primary font-bold">
-            TEAM ID: {teamId}
+    <section id="registration" className="py-32 px-4 relative overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl md:text-7xl mb-6 text-primary font-headline">The Celestial Register</h2>
+          <p className="text-muted-foreground text-lg italic">"Ink your name upon the immortal scroll and face your destiny."</p>
+          <div className="mt-8 inline-block px-8 py-4 ornate-border bg-primary/5 text-primary font-headline text-2xl tracking-widest">
+            TEMPLE KEY: {teamId}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <Card className="gold-border bg-card/40 border-primary/20">
-            <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Team Name</Label>
-                <Input {...register("teamName")} className="bg-background/50 border-primary/20 focus:border-primary" placeholder="Shadow Walkers" />
-                {errors.teamName && <p className="text-destructive text-xs">{errors.teamName.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-12">
+          <Card className="stone-tablet border-primary/30 p-8">
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="space-y-3">
+                <Label className="text-primary font-headline tracking-widest uppercase">Team Moniker</Label>
+                <Input {...register("teamName")} className="bg-black/60 border-primary/20 focus:border-primary h-12 text-lg" placeholder="e.g. Shadow Walkers" />
+                {errors.teamName && <p className="text-secondary text-sm italic">{errors.teamName.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label>Event Choice</Label>
+              <div className="space-y-3">
+                <Label className="text-primary font-headline tracking-widest uppercase">Select Trial</Label>
                 <Select onValueChange={(v) => setValue("eventSelection", v)}>
-                  <SelectTrigger className="bg-background/50 border-primary/20">
-                    <SelectValue placeholder="Select Event" />
+                  <SelectTrigger className="bg-black/60 border-primary/20 h-12 text-lg">
+                    <SelectValue placeholder="Choose Path" />
                   </SelectTrigger>
-                  <SelectContent className="bg-black border-primary/30">
+                  <SelectContent className="bg-card border-primary/30 font-headline">
                     <SelectItem value="ctf">Capture The Flag</SelectItem>
                     <SelectItem value="prompt">Prompt Engineering</SelectItem>
                     <SelectItem value="expo">Paper Expo</SelectItem>
@@ -159,18 +159,18 @@ export const RegistrationForm: React.FC = () => {
                     <SelectItem value="non-tech">Creative Events</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.eventSelection && <p className="text-destructive text-xs">{errors.eventSelection.message}</p>}
+                {errors.eventSelection && <p className="text-secondary text-sm italic">{errors.eventSelection.message}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label>Team Size (1-5)</Label>
+              <div className="space-y-3">
+                <Label className="text-primary font-headline tracking-widest uppercase">Disciple Count</Label>
                 <Select value={teamSize} onValueChange={(v) => setValue("teamSize", v)}>
-                  <SelectTrigger className="bg-background/50 border-primary/20">
+                  <SelectTrigger className="bg-black/60 border-primary/20 h-12 text-lg">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-black border-primary/30">
+                  <SelectContent className="bg-card border-primary/30 font-headline">
                     {["1", "2", "3", "4", "5"].map(s => (
-                      <SelectItem key={s} value={s}>{s} Member{parseInt(s) > 1 ? 's' : ''}</SelectItem>
+                      <SelectItem key={s} value={s}>{s} Disciple{parseInt(s) > 1 ? 's' : ''}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -178,35 +178,38 @@ export const RegistrationForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {fields.map((field, index) => (
-              <Card key={field.id} className="border-primary/10 bg-card/20 animate-in fade-in zoom-in-95 duration-300">
-                <CardHeader>
-                  <CardTitle className="text-sm text-primary uppercase tracking-widest">Member {index + 1}</CardTitle>
+              <Card key={field.id} className="stone-tablet border-accent/30 animate-in fade-in zoom-in-95 duration-500">
+                <CardHeader className="border-b border-accent/20">
+                  <CardTitle className="text-xl text-primary font-headline tracking-widest flex items-center gap-3">
+                    <Flame size={18} className="text-secondary" />
+                    Disciple {index + 1}
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-1">
-                    <Label className="text-xs">Full Name</Label>
-                    <Input {...register(`members.${index}.name`)} className="bg-background/30 h-8" />
+                <CardContent className="space-y-6 pt-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-widest text-muted-foreground">True Name</Label>
+                    <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/20 h-10" />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">Phone</Label>
-                      <Input {...register(`members.${index}.phone`)} className="bg-background/30 h-8" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Spirit Signal (Phone)</Label>
+                      <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/20 h-10" />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Email</Label>
-                      <Input {...register(`members.${index}.email`)} className="bg-background/30 h-8" />
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Digital Echo (Email)</Label>
+                      <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/20 h-10" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <Label className="text-xs">College</Label>
-                      <Input {...register(`members.${index}.college`)} className="bg-background/30 h-8" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Academy (College)</Label>
+                      <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/20 h-10" />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Department</Label>
-                      <Input {...register(`members.${index}.department`)} className="bg-background/30 h-8" />
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-widest text-muted-foreground">Discipline (Dept)</Label>
+                      <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/20 h-10" />
                     </div>
                   </div>
                 </CardContent>
@@ -214,13 +217,13 @@ export const RegistrationForm: React.FC = () => {
             ))}
           </div>
 
-          <div className="text-center pt-8">
+          <div className="text-center pt-12">
             <Button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/80 text-black font-black px-12 py-8 text-xl gold-border mystical-glow rounded-none transition-all w-full md:w-auto"
+              className="bg-primary hover:bg-primary/80 text-black font-black px-16 py-10 text-2xl ornate-border shadow-gold-glow rounded-none transition-all w-full md:w-auto hover:scale-105"
             >
-              {isSubmitting ? "INITIATING JOURNEY..." : "SIGN THE MYTHIC SCROLL"}
+              {isSubmitting ? "TRANSCENDING..." : "SEAL THE SCROLL"}
             </Button>
           </div>
         </form>
