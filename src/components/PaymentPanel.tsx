@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle2, QrCode, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sparkles, ShieldCheck, Info } from 'lucide-react';
 import Image from 'next/image';
 import { useFirestore } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { motion } from 'framer-motion';
 
 interface PaymentPanelProps {
   teamId: string;
@@ -27,7 +28,11 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
 
   const handlePaymentSubmit = () => {
     if (!txnId || txnId.length < 6) {
-      toast({ title: "Error", description: "Please enter a valid Transaction ID", variant: "destructive" });
+      toast({ 
+        title: "Tribute Invalid", 
+        description: "Please enter a valid Transaction UTR (12 digits)", 
+        variant: "destructive" 
+      });
       return;
     }
 
@@ -38,7 +43,10 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
     updateDoc(docRef, updateData)
       .then(() => {
         setCompleted(true);
-        toast({ title: "Success", description: "Payment details submitted for verification." });
+        toast({ 
+          title: "Tribute Accepted", 
+          description: "Your verification is underway. Patience is the root of wisdom." 
+        });
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -47,7 +55,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
           requestResourceData: updateData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        toast({ title: "Error", description: "Failed to update record. Please try again.", variant: "destructive" });
+        toast({ title: "Spirit Interruption", description: "Failed to seal your tribute. Try again.", variant: "destructive" });
       })
       .finally(() => {
         setIsUpdating(false);
@@ -56,71 +64,126 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
 
   if (completed) {
     return (
-      <div className="py-24 px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-500">
-        <CheckCircle2 size={80} className="mx-auto text-primary mb-6" />
-        <h2 className="text-4xl text-primary mb-4">Registration Locked</h2>
-        <p className="text-xl text-muted-foreground mb-12">Your journey has begun. We will verify your transaction ID soon.</p>
-        <Button onClick={() => window.location.reload()} className="bg-primary text-black font-bold px-8">Return Home</Button>
+      <div className="py-48 px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-700">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none"
+        >
+          <div className="text-[40rem] text-primary">道</div>
+        </motion.div>
+        
+        <div className="relative z-10">
+          <CheckCircle2 size={120} className="mx-auto text-primary mb-12 drop-shadow-[0_0_20px_rgba(200,155,60,0.5)]" />
+          <h2 className="text-5xl md:text-7xl text-primary font-headline mb-8 gold-glow-text">Journey Locked</h2>
+          <p className="text-2xl text-muted-foreground font-body italic mb-16 leading-relaxed">
+            "Your path is set. The Great Sage is reviewing your tribute. Watch the skies for the signal."
+          </p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            className="bg-primary text-black font-bold px-16 py-8 text-xl ornate-border shadow-gold-glow hover:scale-105 transition-transform"
+          >
+            RETURN TO SANCTUARY
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="py-24 px-4 max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-10 duration-700">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Left: Mystical Blessing */}
-        <div className="flex flex-col justify-center space-y-8">
-          <div className="relative p-8 gold-border bg-card/60 backdrop-blur-md italic">
-            <Sparkles className="absolute -top-3 -left-3 text-primary animate-pulse" />
-            <h3 className="text-primary font-headline mb-4 uppercase tracking-tighter">Ancient Blessing</h3>
-            <p className="text-2xl text-foreground font-serif leading-relaxed">
+    <div className="py-32 px-4 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        {/* Left: Mystical Blessing & Info */}
+        <motion.div 
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="flex flex-col justify-center space-y-12"
+        >
+          <div className="relative p-10 parchment-texture ornate-border shadow-2xl">
+            <Sparkles className="absolute -top-4 -left-4 text-primary animate-pulse" size={32} />
+            <h3 className="text-primary font-headline mb-6 uppercase tracking-[0.3em] text-xl">The Sage's Blessing</h3>
+            <p className="text-2xl md:text-3xl text-foreground font-body leading-relaxed italic border-l-4 border-primary/40 pl-8">
               "{proverb || "The path reveals itself only to those who dare to step into the shadow."}"
             </p>
-            <p className="mt-4 text-sm text-primary/50 text-right font-headline">— The Sage of VULNIX</p>
+            <p className="mt-8 text-sm text-primary/50 text-right font-headline tracking-widest">— VULNIX ORACLE</p>
           </div>
-          <div className="text-sm text-muted-foreground bg-primary/5 p-4 border-l-2 border-primary">
-            Keep your Team ID safe: <span className="text-primary font-bold">{teamId}</span>
-          </div>
-        </div>
 
-        {/* Right: Payment Form */}
-        <Card className="gold-border bg-card border-primary/30">
-          <CardHeader>
-            <CardTitle className="text-primary">Finalize Trials</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 text-center">
-            <div className="bg-white p-4 inline-block rounded-lg shadow-lg">
-              <Image 
-                src="https://picsum.photos/seed/vulnix_qr/300/300" 
-                alt="UPI QR Code" 
-                width={300} 
-                height={300}
-                className="mx-auto"
-                data-ai-hint="QR code"
-              />
+          <Card className="bg-black/40 border-primary/20 p-8 rounded-none">
+            <div className="flex items-start gap-6">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <ShieldCheck className="text-primary" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-primary font-headline tracking-widest text-lg block uppercase">Team Identification</Label>
+                <div className="text-3xl font-code tracking-[0.3em] text-white/90">
+                  {teamId}
+                </div>
+                <p className="text-xs text-muted-foreground italic">Keep this secret. It is the key to your trials.</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground uppercase tracking-widest">Scan to pay registration fee</p>
-            
-            <div className="space-y-2 text-left">
-              <Label>Transaction ID (UTR)</Label>
-              <Input 
-                value={txnId}
-                onChange={(e) => setTxnId(e.target.value)}
-                placeholder="Enter 12-digit UTR number" 
-                className="bg-black/50 border-primary/20 focus:border-primary text-center tracking-widest"
-              />
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button 
-              onClick={handlePaymentSubmit}
-              disabled={isUpdating}
-              className="w-full bg-primary hover:bg-primary/80 text-black font-black h-12 uppercase"
-            >
-              {isUpdating ? "CONFIRMING..." : "Confirm Registration"}
-            </Button>
-          </CardFooter>
-        </Card>
+          </Card>
+        </motion.div>
+
+        {/* Right: Payment Console */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="stone-tablet border-primary/30 rounded-none overflow-hidden ornate-border shadow-2xl">
+            <CardHeader className="bg-primary/5 border-b border-primary/20 p-8">
+              <CardTitle className="text-3xl text-primary font-headline tracking-widest flex items-center gap-4">
+                Finalize Trials
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-10 p-10 text-center">
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000"></div>
+                <div className="relative bg-white p-6 inline-block rounded-lg shadow-2xl">
+                  <Image 
+                    src="https://picsum.photos/seed/vulnix_qr_code/400/400" 
+                    alt="Celestial UPI QR" 
+                    width={250} 
+                    height={250}
+                    className="mx-auto"
+                    data-ai-hint="QR code"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <p className="text-muted-foreground uppercase tracking-[0.3em] text-sm">Scan to offer your registration fee</p>
+                <div className="h-px w-24 bg-primary/20 mx-auto" />
+              </div>
+              
+              <div className="space-y-4 text-left">
+                <Label className="text-primary font-headline text-xs tracking-widest uppercase">Transaction UTR (12 Digits)</Label>
+                <Input 
+                  value={txnId}
+                  onChange={(e) => setTxnId(e.target.value)}
+                  placeholder="Enter your spirit signature" 
+                  className="bg-black/60 border-primary/30 h-16 text-center text-2xl tracking-[0.4em] focus:border-primary rounded-none placeholder:opacity-10"
+                />
+              </div>
+
+              <div className="flex gap-4 p-4 bg-secondary/5 border-l-2 border-secondary/40 text-left">
+                <Info size={18} className="text-secondary shrink-0" />
+                <p className="text-xs text-muted-foreground italic leading-relaxed">
+                  The verified UTR is your proof of passage. Incorrect entries may stall your journey indefinitely.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="p-0">
+              <Button 
+                onClick={handlePaymentSubmit}
+                disabled={isUpdating}
+                className="w-full h-24 bg-primary hover:bg-primary/90 text-black font-black text-2xl uppercase tracking-[0.5em] rounded-none shadow-gold-glow transition-all"
+              >
+                {isUpdating ? "SEALING RECORD..." : "CONFIRM PASSAGE"}
+              </Button>
+            </CardFooter>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
