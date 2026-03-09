@@ -1,18 +1,44 @@
-import React from 'react';
+"use client"
+
+import React, { useState } from 'react';
 import { ThreeScene } from '@/components/ThreeScene';
 import { Hero } from '@/components/Hero';
 import { About } from '@/components/About';
 import { Events } from '@/components/Events';
 import { RegistrationForm } from '@/components/RegistrationForm';
+import { FogPortal } from '@/components/FogPortal';
 import { Toaster } from '@/components/ui/toaster';
 
 export default function Home() {
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const handleRegisterPortal = () => {
+    setIsTransitioning(true);
+    
+    // Simulate the "portal" journey
+    setTimeout(() => {
+      const regSection = document.getElementById('registration');
+      if (regSection) {
+        // Scroll instantly while covered by fog
+        regSection.scrollIntoView({ behavior: 'auto' });
+      }
+      
+      // Wait a moment at the destination before lifting the fog
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 1000);
+    }, 1500);
+  };
+
   return (
     <main className="relative min-h-screen">
+      {/* Cinematic Portal Overlay */}
+      <FogPortal isVisible={isTransitioning} />
+
       {/* Immersive 3D Background */}
       <ThreeScene />
       
-      {/* Navigation (Simplified for theme) */}
+      {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
         <div className="text-2xl font-black text-primary pointer-events-auto">VULNIX 2.0</div>
         <div className="hidden md:flex gap-8 text-xs font-headline tracking-widest text-primary/70 pointer-events-auto">
@@ -23,7 +49,7 @@ export default function Home() {
       </nav>
 
       {/* Content Sections */}
-      <Hero />
+      <Hero onRegisterPortal={handleRegisterPortal} />
       <About />
       <Events />
       <RegistrationForm />

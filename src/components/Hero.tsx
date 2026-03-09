@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Sparkles, Scroll as ScrollIcon } from 'lucide-react';
 
-export const Hero: React.FC = () => {
+interface HeroProps {
+  onRegisterPortal?: () => void;
+}
+
+export const Hero: React.FC<HeroProps> = ({ onRegisterPortal }) => {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -67,7 +71,7 @@ export const Hero: React.FC = () => {
           
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center pointer-events-auto">
             <Button 
-              onClick={() => scrollToSection('registration')}
+              onClick={onRegisterPortal || (() => scrollToSection('registration'))}
               size="lg" 
               className="bg-primary hover:bg-primary/80 text-black font-bold px-12 py-8 text-xl rounded-none shadow-gold-glow ornate-border transition-all hover:scale-105"
             >
