@@ -1,0 +1,47 @@
+
+{
+  "entities": {
+    "Member": {
+      "title": "Team Member",
+      "description": "Information about a single team member.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "college": { "type": "string" },
+        "department": { "type": "string" }
+      },
+      "required": ["name", "phone", "email", "college", "department"]
+    },
+    "Registration": {
+      "title": "Symposium Registration",
+      "description": "A full team registration for VULNIX 2.0.",
+      "type": "object",
+      "properties": {
+        "teamName": { "type": "string" },
+        "eventSelection": { "type": "string" },
+        "teamSize": { "type": "number" },
+        "members": {
+          "type": "array",
+          "items": { "$ref": "#/backend/entities/Member" }
+        },
+        "teamId": { "type": "string" },
+        "txnId": { "type": "string" },
+        "proverb": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "verified"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["teamName", "eventSelection", "teamSize", "members", "teamId"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com"]
+  },
+  "firestore": {
+    "/registrations/{teamId}": {
+      "schema": "Registration",
+      "description": "Stores team registration and payment verification data."
+    }
+  }
+}

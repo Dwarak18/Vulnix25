@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -12,6 +13,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { generateMysticalProverb } from '@/ai/flows/ai-powered-mystical-proverb-generator-flow';
 import { PaymentPanel } from './PaymentPanel';
+import { useFirestore } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const memberSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -31,13 +36,13 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export const RegistrationForm: React.FC = () => {
+  const db = useFirestore();
   const [teamId, setTeamId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<any>(null);
   const [proverb, setProverb] = useState('');
 
   useEffect(() => {
-    // Generate unique Team ID on mount or refresh
     const randomId = Math.floor(1000 + Math.random() * 9000);
     setTeamId(`VULNIX-${randomId}`);
   }, []);
@@ -74,17 +79,33 @@ export const RegistrationForm: React.FC = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    const formData = { ...data, teamId };
-
+    
     try {
-      // Placeholder API call
-      // await fetch("YOUR_GOOGLE_APPS_SCRIPT_URL", { method: "POST", body: JSON.stringify(formData) });
-      
-      // Generate GenAI Proverb
       const proverbRes = await generateMysticalProverb({ teamName: data.teamName });
-      setProverb(proverbRes.proverb);
+      const currentProverb = proverbRes.proverb;
+      setProverb(currentProverb);
+
+      const registrationData = {
+        ...data,
+        teamId,
+        proverb: currentProverb,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      };
+
+      const docRef = doc(db, 'registrations', teamId);
       
-      setSubmittedData(formData);
+      setDoc(docRef, registrationData)
+        .catch(async (serverError) => {
+          const permissionError = new FirestorePermissionError({
+            path: docRef.path,
+            operation: 'create',
+            requestResourceData: registrationData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+
+      setSubmittedData(registrationData);
       toast({
         title: "Registration Initialized",
         description: "Proceed to payment to finalize your entry.",
@@ -92,7 +113,7 @@ export const RegistrationForm: React.FC = () => {
     } catch (error) {
       toast({
         title: "Submission Error",
-        description: "Failed to submit. Please try again.",
+        description: "Failed to initialize registration. Please try again.",
         variant: "destructive",
       });
     } finally {

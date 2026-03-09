@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState } from 'react';
@@ -8,6 +9,10 @@ import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle2, QrCode, Sparkles } from 'lucide-react';
 import Image from 'next/image';
+import { useFirestore } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 interface PaymentPanelProps {
   teamId: string;
@@ -15,17 +20,38 @@ interface PaymentPanelProps {
 }
 
 export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) => {
+  const db = useFirestore();
   const [txnId, setTxnId] = useState('');
   const [completed, setCompleted] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handlePaymentSubmit = () => {
-    if (!txnId) {
-      toast({ title: "Error", description: "Please enter your Transaction ID", variant: "destructive" });
+    if (!txnId || txnId.length < 6) {
+      toast({ title: "Error", description: "Please enter a valid Transaction ID", variant: "destructive" });
       return;
     }
-    // Placeholder for final submission
-    setCompleted(true);
-    toast({ title: "Success", description: "Payment details submitted for verification." });
+
+    setIsUpdating(true);
+    const docRef = doc(db, 'registrations', teamId);
+    const updateData = { txnId, status: 'pending' };
+
+    updateDoc(docRef, updateData)
+      .then(() => {
+        setCompleted(true);
+        toast({ title: "Success", description: "Payment details submitted for verification." });
+      })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: updateData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ title: "Error", description: "Failed to update record. Please try again.", variant: "destructive" });
+      })
+      .finally(() => {
+        setIsUpdating(false);
+      });
   };
 
   if (completed) {
@@ -88,9 +114,10 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
           <CardFooter>
             <Button 
               onClick={handlePaymentSubmit}
+              disabled={isUpdating}
               className="w-full bg-primary hover:bg-primary/80 text-black font-black h-12 uppercase"
             >
-              Confirm Registration
+              {isUpdating ? "CONFIRMING..." : "Confirm Registration"}
             </Button>
           </CardFooter>
         </Card>
