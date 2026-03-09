@@ -5,6 +5,9 @@ import * as THREE from 'three';
 
 export const ThreeScene: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const mouse = useRef({ x: 0, y: 0 });
+  const isHovered = useRef(false);
+  const clickBurst = useRef(0);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -21,10 +24,12 @@ export const ThreeScene: React.FC = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Ruyi Jingu Bang (Golden Hoop Staff) - Improved Mythology Look
+    const raycaster = new THREE.Raycaster();
+
+    // Ruyi Jingu Bang (Golden Hoop Staff)
     const staffGroup = new THREE.Group();
     
-    // Main staff body (Ancient Dark Iron)
+    // Main staff body
     const staffGeo = new THREE.CylinderGeometry(0.1, 0.1, 6, 32);
     const staffMat = new THREE.MeshStandardMaterial({ 
       color: 0x111111, 
@@ -69,26 +74,36 @@ export const ThreeScene: React.FC = () => {
 
     scene.add(staffGroup);
 
-    // Ash / Embers Particles (More cinematic)
-    const particleCount = 1200;
+    // Ash / Embers Particles
+    const particleCount = 2000;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount);
-    const life = new Float32Array(particleCount);
+    const velocities = new Float32Array(particleCount * 3);
+    const initialPositions = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
-      velocities[i] = 0.005 + Math.random() * 0.015;
-      life[i] = Math.random();
+      const x = (Math.random() - 0.5) * 30;
+      const y = (Math.random() - 0.5) * 30;
+      const z = (Math.random() - 0.5) * 30;
+      
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+      
+      initialPositions[i * 3] = x;
+      initialPositions[i * 3 + 1] = y;
+      initialPositions[i * 3 + 2] = z;
+
+      velocities[i * 3] = (Math.random() - 0.5) * 0.01;
+      velocities[i * 3 + 1] = 0.005 + Math.random() * 0.015;
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
     }
 
     particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     
     const particleMat = new THREE.PointsMaterial({
       color: 0xc89b3c,
-      size: 0.05,
+      size: 0.06,
       transparent: true,
       opacity: 0.7,
       blending: THREE.AdditiveBlending,
@@ -110,7 +125,19 @@ export const ThreeScene: React.FC = () => {
     accentLight.position.set(-5, -2, 2);
     scene.add(accentLight);
 
-    // Scroll state tracking
+    // Interaction Listeners
+    const onMouseMove = (event: MouseEvent) => {
+      mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.current.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+
+    const onClick = () => {
+      clickBurst.current = 1.0; // Trigger burst effect
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousedown', onClick);
+
     let scrollY = 0;
     const onScroll = () => {
       scrollY = window.scrollY;
@@ -121,29 +148,71 @@ export const ThreeScene: React.FC = () => {
     const animate = () => {
       requestAnimationFrame(animate);
 
-      // Staff subtle floating animation
       const time = Date.now() * 0.001;
+
+      // Raycasting for hover detection
+      raycaster.setFromCamera(new THREE.Vector2(mouse.current.x, mouse.current.y), camera);
+      const intersects = raycaster.intersectObjects(staffGroup.children);
+      isHovered.current = intersects.length > 0;
+
+      // Update Staff Appearance based on Hover
+      const targetEmissive = isHovered.current ? 1.5 : 0.3;
+      hoopMat.emissiveIntensity = THREE.MathUtils.lerp(hoopMat.emissiveIntensity, targetEmissive, 0.1);
+      
+      const targetParticleSize = isHovered.current ? 0.12 : 0.06;
+      particleMat.size = THREE.MathUtils.lerp(particleMat.size, targetParticleSize, 0.1);
+
+      // Staff subtle floating and rotation tracking
       staffGroup.rotation.y += 0.008;
-      staffGroup.rotation.z = Math.sin(time * 0.5) * 0.1;
+      
+      // Rotate slightly toward cursor
+      const targetRotX = mouse.current.y * 0.3;
+      const targetRotZ = -mouse.current.x * 0.3;
+      staffGroup.rotation.x = THREE.MathUtils.lerp(staffGroup.rotation.x, targetRotX + (scrollY * 0.001), 0.05);
+      staffGroup.rotation.z = THREE.MathUtils.lerp(staffGroup.rotation.z, targetRotZ + (Math.sin(time * 0.5) * 0.1), 0.05);
+      
       staffGroup.position.y = Math.sin(time * 0.8) * 0.2;
 
-      // Parallax and zoom based on scroll
-      // As we scroll, camera moves down and slightly closer
+      // Camera parallax and zoom
       const targetZ = 8 - Math.min(scrollY * 0.002, 3);
       camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.05);
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, -scrollY * 0.005, 0.05);
       camera.lookAt(0, -scrollY * 0.005, 0);
 
-      // Staff rotates faster or shifts on scroll
-      staffGroup.rotation.x = scrollY * 0.001;
-
-      // Particles animation (Ash drift)
+      // Particles animation
       const pPos = particleGeo.attributes.position.array as Float32Array;
       for (let i = 0; i < particleCount; i++) {
-        pPos[i * 3 + 1] += velocities[i];
-        if (pPos[i * 3 + 1] > 15) pPos[i * 3 + 1] = -15;
-        pPos[i * 3] += Math.sin(time + i) * 0.003;
+        // Normal drift
+        pPos[i * 3 + 1] += velocities[i * 3 + 1];
+        pPos[i * 3] += velocities[i * 3] + Math.sin(time + i) * 0.002;
+        pPos[i * 3 + 2] += velocities[i * 3 + 2];
+
+        // Burst effect logic
+        if (clickBurst.current > 0) {
+          const dirX = pPos[i * 3];
+          const dirY = pPos[i * 3 + 1];
+          const dirZ = pPos[i * 3 + 2];
+          const dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+          
+          // Push particles away from center
+          pPos[i * 3] += (dirX / dist) * clickBurst.current * 0.2;
+          pPos[i * 3 + 1] += (dirY / dist) * clickBurst.current * 0.2;
+          pPos[i * 3 + 2] += (dirZ / dist) * clickBurst.current * 0.2;
+        }
+
+        // Reset particles that go too far
+        if (pPos[i * 3 + 1] > 15) {
+          pPos[i * 3] = (Math.random() - 0.5) * 30;
+          pPos[i * 3 + 1] = -15;
+          pPos[i * 3 + 2] = (Math.random() - 0.5) * 30;
+        }
       }
+      
+      // Decay burst effect
+      if (clickBurst.current > 0) {
+        clickBurst.current -= 0.02;
+      }
+
       particleGeo.attributes.position.needsUpdate = true;
 
       renderer.render(scene, camera);
@@ -161,6 +230,8 @@ export const ThreeScene: React.FC = () => {
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mousedown', onClick);
       containerRef.current?.removeChild(renderer.domElement);
       renderer.dispose();
     };
