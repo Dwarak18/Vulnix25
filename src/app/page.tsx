@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { ThreeScene } from '@/components/ThreeScene';
 import { Hero } from '@/components/Hero';
 import { About } from '@/components/About';
@@ -16,15 +17,12 @@ export default function Home() {
   const handleRegisterPortal = () => {
     setIsTransitioning(true);
     
-    // Simulate the "portal" journey
     setTimeout(() => {
       const regSection = document.getElementById('registration');
       if (regSection) {
-        // Scroll instantly while covered by fog
         regSection.scrollIntoView({ behavior: 'auto' });
       }
       
-      // Wait a moment at the destination before lifting the fog
       setTimeout(() => {
         setIsTransitioning(false);
       }, 1000);
@@ -58,8 +56,36 @@ export default function Home() {
       <Events />
       <RegistrationForm />
 
+      {/* Ending Scene */}
+      <section className="relative py-64 overflow-hidden flex flex-col items-center justify-center text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: false, margin: "-100px" }}
+          transition={{ duration: 2, ease: "easeOut" }}
+          className="relative z-10"
+        >
+          <div className="h-px w-32 bg-gradient-to-r from-transparent via-primary to-transparent mb-12 mx-auto" />
+          <h2 className="text-5xl md:text-8xl text-primary font-headline tracking-[0.3em] gold-glow-text uppercase">
+            The Trials Await.
+          </h2>
+          <div className="h-px w-32 bg-gradient-to-r from-transparent via-primary to-transparent mt-12 mx-auto" />
+          
+          <motion.p 
+            className="mt-12 text-muted-foreground font-body text-xl italic tracking-widest"
+            animate={{ opacity: [0.4, 0.8, 0.4] }}
+            transition={{ duration: 4, repeat: Infinity }}
+          >
+            Will you face the Sage?
+          </motion.p>
+        </motion.div>
+        
+        {/* Swirling Embers at the very bottom */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-primary/5 to-transparent opacity-30" />
+      </section>
+
       {/* Footer */}
-      <footer className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/80">
+      <footer className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20">
         <div className="max-w-4xl mx-auto px-4">
           <p className="mb-4">© VULNIX 2.0 SYMPOSIUM — POWERED BY THE ANCIENT SPIRIT OF INNOVATION</p>
           <div className="flex justify-center gap-6">
