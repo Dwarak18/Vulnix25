@@ -134,7 +134,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
       }}
       className={cn(
         "stone-tablet p-6 md:p-8 ornate-border group relative overflow-hidden transition-all duration-500",
-        (isSpecial || event.highlight) ? "border-primary shadow-gold-glow" : "border-primary/20",
+        (isSpecial || event.highlight) ? "border-primary/40 shadow-gold-glow/10" : "border-primary/20",
         "cursor-pointer"
       )}
       style={{ perspective: "1000px" }}
@@ -166,10 +166,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
       ))}
 
       <div className="relative z-10">
-        <h4 className={cn(
-          "text-xl md:text-2xl font-headline tracking-widest mb-2 transition-colors",
-          (isSpecial || event.highlight) ? "gold-glow-text text-primary" : "group-hover:text-primary"
-        )}>
+        <h4 className="text-xl md:text-2xl font-headline tracking-widest mb-2 text-primary/90 transition-colors group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(200,155,60,0.3)]">
           {event.title}
         </h4>
         <p className="text-muted-foreground font-body italic text-sm md:text-base leading-relaxed">
@@ -178,8 +175,8 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
         
         {(isSpecial || event.highlight) && (
           <div className="mt-4 pt-4 border-t border-primary/20 flex items-center gap-2">
-            <Sparkles size={14} className="text-primary animate-pulse" />
-            <span className="text-[10px] uppercase tracking-[0.2em] text-primary/70 font-headline">Supreme Trial</span>
+            <Sparkles size={14} className="text-primary/60" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-primary/50 font-headline">Supreme Trial</span>
           </div>
         )}
       </div>
@@ -197,19 +194,19 @@ const TimelineBlock = ({ item, index }: { item: any, index: number }) => {
     <div className="relative flex flex-col md:flex-row gap-8 mb-24 w-full">
       {/* Time & Marker */}
       <div className="w-full md:w-48 flex flex-row md:flex-col items-center md:items-end gap-4 shrink-0">
-        <div className="text-primary font-headline tracking-widest text-sm md:text-right">
+        <div className="text-primary/80 font-headline tracking-widest text-sm md:text-right">
           {item.time}
         </div>
         <div className={cn(
-          "w-10 h-10 rounded-full border-2 bg-background flex items-center justify-center relative z-20 shadow-gold-glow transition-transform duration-500 group-hover:scale-110",
-          item.isSpecial ? "border-primary" : "border-primary/40"
+          "w-10 h-10 rounded-full border-2 bg-background flex items-center justify-center relative z-20 transition-transform duration-500",
+          item.isSpecial ? "border-primary/60 shadow-gold-glow/20" : "border-primary/30"
         )}>
-          <div className={cn("w-2 h-2 rounded-full", item.isSpecial ? "bg-primary animate-pulse" : "bg-primary/40")} />
+          <div className={cn("w-2 h-2 rounded-full", item.isSpecial ? "bg-primary animate-pulse" : "bg-primary/30")} />
           
           {/* Vertical Line Segment */}
-          <div className="absolute top-10 w-px h-24 bg-gradient-to-b from-primary/40 to-transparent hidden md:block" />
+          <div className="absolute top-10 w-px h-24 bg-gradient-to-b from-primary/30 to-transparent hidden md:block" />
         </div>
-        <div className="p-2 rounded-sm bg-primary/5 text-primary border border-primary/20 md:mt-2">
+        <div className="p-2 rounded-sm bg-primary/5 text-primary/70 border border-primary/10 md:mt-2">
           {item.icon}
         </div>
       </div>
@@ -257,14 +254,14 @@ export default function SchedulePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary to-transparent mb-8 mx-auto" />
+          <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary/60 to-transparent mb-8 mx-auto" />
           <h1 className="text-5xl md:text-8xl text-primary font-headline tracking-[0.2em] uppercase gold-glow-text mb-6">
             Chronicle of the Trials
           </h1>
-          <p className="text-muted-foreground text-xl md:text-2xl font-body italic tracking-widest uppercase">
+          <p className="text-muted-foreground text-xl md:text-2xl font-body italic tracking-widest uppercase opacity-80">
             VULNIX 2.0 Event Schedule
           </p>
-          <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary to-transparent mt-8 mx-auto" />
+          <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary/60 to-transparent mt-8 mx-auto" />
         </motion.div>
       </section>
 
@@ -273,7 +270,7 @@ export default function SchedulePage() {
         {/* Animated Central Timeline Line */}
         <div className="absolute left-[44px] md:left-[192px] top-0 bottom-0 w-[2px] bg-primary/10 hidden sm:block">
           <motion.div 
-            className="w-full bg-primary shadow-gold-glow"
+            className="w-full bg-primary/40 shadow-gold-glow/20"
             style={{ 
               scaleY, 
               originY: 0,
@@ -306,7 +303,7 @@ export default function SchedulePage() {
           className="max-w-4xl mx-auto px-4"
         >
           <div className="h-px w-16 bg-primary/20 mx-auto mb-12" />
-          <p className="text-2xl md:text-4xl text-primary font-headline italic tracking-[0.2em] leading-relaxed gold-glow-text">
+          <p className="text-2xl md:text-4xl text-primary/90 font-headline italic tracking-[0.2em] leading-relaxed">
             "Every second is a grain of sand in the hourglass of destiny. Use yours wisely."
           </p>
           <div className="h-px w-16 bg-primary/20 mx-auto mt-12" />
@@ -324,4 +321,3 @@ export default function SchedulePage() {
     </main>
   );
 }
-
