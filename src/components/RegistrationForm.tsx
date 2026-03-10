@@ -159,8 +159,16 @@ export const RegistrationForm: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const proverbRes = await generateMysticalProverb({ teamName: data.teamName });
-      const currentProverb = proverbRes.proverb;
+      let currentProverb = "The path reveals itself only to those who dare to step into the shadow.";
+
+      try {
+        const proverbRes = await generateMysticalProverb({ teamName: data.teamName });
+        if (proverbRes && proverbRes.proverb) {
+          currentProverb = proverbRes.proverb;
+        }
+      } catch (err) {
+        console.warn("AI proverb generator failed, using fallback proverb.");
+      }
 
       const registrationData = {
         ...data,
