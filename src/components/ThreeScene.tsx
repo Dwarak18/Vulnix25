@@ -20,7 +20,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const frameId = useRef<number | null>(null);
   const isMobile = useIsMobile();
   
-  // Refs for animation and model control
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
   const modelRef = useRef<THREE.Object3D | null>(null);
   const dragonFireSpiralRef = useRef<THREE.Points | null>(null);
@@ -33,36 +32,121 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
 
-  // Procedural "Celestial Fire Staff"
+  // Create a procedural texture for "engravings" and "calligraphy"
+  const createOrnateTexture = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      // Background
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillRect(0, 0, 512, 512);
+      
+      // Patterns
+      ctx.strokeStyle = '#c89b3c';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 15]);
+      
+      // Draw some "mythical" lines/characters
+      for (let i = 0; i < 20; i++) {
+        ctx.beginPath();
+        ctx.moveTo(Math.random() * 512, Math.random() * 512);
+        ctx.bezierCurveTo(
+          Math.random() * 512, Math.random() * 512,
+          Math.random() * 512, Math.random() * 512,
+          Math.random() * 512, Math.random() * 512
+        );
+        ctx.stroke();
+      }
+
+      // Add "Glow" highlights for the energy lines
+      ctx.strokeStyle = '#ffaa00';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 5; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * 100);
+        ctx.lineTo(512, i * 100);
+        ctx.stroke();
+      }
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+  };
+
+  // Procedural "Ruyi Jingu Bang"
   const createFireStaff = (scene: THREE.Scene) => {
     const group = new THREE.Group();
+    const ornateTexture = createOrnateTexture();
     
-    // Main shaft
-    const geometry = new THREE.CylinderGeometry(0.1, 0.1, 8, 32);
-    const material = new THREE.MeshStandardMaterial({
+    // 1. Main Gold Shaft (Polished Gold)
+    const shaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 8, 32);
+    const goldMat = new THREE.MeshStandardMaterial({
       color: 0xc89b3c,
-      metalness: 1.0,
-      roughness: 0.1,
-      emissive: 0xc89b3c,
-      emissiveIntensity: 0.8
+      metalness: 0.9,
+      roughness: 0.2,
+      emissive: 0x332200,
+      emissiveIntensity: 0.5,
+      map: ornateTexture
     });
-    const staff = new THREE.Mesh(geometry, material);
-    group.add(staff);
+    const shaft = new THREE.Mesh(shaftGeo, goldMat);
+    group.add(shaft);
 
-    // Glowing ornaments
-    const ringGeo = new THREE.TorusGeometry(0.3, 0.05, 16, 100);
+    // 2. Red Lacquer Sections (Deep Crimson)
+    const redGeo = new THREE.CylinderGeometry(0.13, 0.13, 1.5, 32);
+    const redMat = new THREE.MeshStandardMaterial({
+      color: 0x7a1e1e,
+      metalness: 0.5,
+      roughness: 0.1,
+      emissive: 0x220000,
+      emissiveIntensity: 0.2
+    });
+
+    const topRed = new THREE.Mesh(redGeo, redMat);
+    topRed.position.y = 2.5;
+    group.add(topRed);
+
+    const bottomRed = new THREE.Mesh(redGeo, redMat);
+    bottomRed.position.y = -2.5;
+    group.add(bottomRed);
+
+    // 3. Ornate Caps (Thicker Engraved Gold)
+    const capGeo = new THREE.CylinderGeometry(0.15, 0.15, 0.8, 32);
+    const topCap = new THREE.Mesh(capGeo, goldMat);
+    topCap.position.y = 3.65;
+    group.add(topCap);
+
+    const bottomCap = new THREE.Mesh(capGeo, goldMat);
+    bottomCap.position.y = -3.65;
+    group.add(bottomCap);
+
+    // 4. Intricate Golden Rings & Patterns
+    const ringGeo = new THREE.TorusGeometry(0.16, 0.02, 16, 64);
     const ringMat = new THREE.MeshStandardMaterial({ 
       color: 0xffaa00,
       emissive: 0xffaa00,
-      emissiveIntensity: 2.0
+      emissiveIntensity: 1.5,
+      metalness: 1.0
     });
     
-    for (let i = 0; i < 4; i++) {
+    const ringPositions = [3.25, 1.75, -1.75, -3.25];
+    ringPositions.forEach(y => {
       const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.y = (i - 1.5) * 2;
+      ring.position.y = y;
       ring.rotation.x = Math.PI / 2;
       group.add(ring);
-    }
+    });
+
+    // 5. Cloud Motifs (Decorative Spheres/Disks)
+    const cloudGeo = new THREE.TorusGeometry(0.18, 0.01, 8, 32);
+    [3.65, -3.65].forEach(y => {
+      const cloud = new THREE.Mesh(cloudGeo, ringMat);
+      cloud.position.y = y;
+      cloud.rotation.x = Math.PI / 2;
+      group.add(cloud);
+    });
 
     scene.add(group);
     modelRef.current = group;
@@ -72,9 +156,8 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050101); // Dark charcoal/red base
+    scene.background = new THREE.Color(0x050101);
     scene.fog = new THREE.FogExp2(0x1a0505, 0.05);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -89,33 +172,30 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // 2. Post Processing (Dramatic Fire Bloom)
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      2.0, // Strength
-      0.4, // Radius
-      0.6  // Threshold
+      2.5, // Increased strength for mystical feel
+      0.5, 
+      0.6  
     );
     
     const composer = new EffectComposer(renderer);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
-    // 3. Lighting (Flickering Gold & Red)
-    const ambientLight = new THREE.AmbientLight(0x221100, 0.3);
+    const ambientLight = new THREE.AmbientLight(0x442211, 0.5);
     scene.add(ambientLight);
 
-    const goldenPointLight = new THREE.PointLight(0xff9900, 50, 25);
-    goldenPointLight.position.set(0, 0, 2);
+    const goldenPointLight = new THREE.PointLight(0xffaa00, 60, 25);
+    goldenPointLight.position.set(0, 0, 3);
     scene.add(goldenPointLight);
     goldenLightRef.current = goldenPointLight;
 
-    const redRimLight = new THREE.PointLight(0xff0000, 30, 30);
-    redRimLight.position.set(-8, 5, -8);
+    const redRimLight = new THREE.PointLight(0x7a1e1e, 40, 30);
+    redRimLight.position.set(-10, 5, -5);
     scene.add(redRimLight);
 
-    // 4. Load Wukong or Fallback
     const loader = new GLTFLoader();
     loader.load(
       '/black_myth_wukong_-_sun_wu_kong.glb', 
@@ -145,67 +225,64 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       () => createFireStaff(scene)
     );
 
-    // 5. Fire Particles (Ground Flames)
-    const fireCount = isMobile ? 80 : 200;
+    // Fire Particles
+    const fireCount = isMobile ? 60 : 120;
     const fireGeo = new THREE.BufferGeometry();
     const firePos = new Float32Array(fireCount * 3);
-    const fireColors = new Float32Array(fireCount * 3);
     for (let i = 0; i < fireCount; i++) {
-      firePos[i * 3] = (Math.random() - 0.5) * 4;
-      firePos[i * 3 + 1] = -4; // Base
-      firePos[i * 3 + 2] = (Math.random() - 0.5) * 4;
+      firePos[i * 3] = (Math.random() - 0.5) * 5;
+      firePos[i * 3 + 1] = -5;
+      firePos[i * 3 + 2] = (Math.random() - 0.5) * 5;
     }
     fireGeo.setAttribute('position', new THREE.BufferAttribute(firePos, 3));
     const fireMat = new THREE.PointsMaterial({
-      size: 0.15,
-      vertexColors: false,
-      color: 0xff4400,
+      size: 0.12,
+      color: 0xcc4400,
       transparent: true,
-      opacity: 0.8,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending
     });
     const groundFlames = new THREE.Points(fireGeo, fireMat);
     groundFlamesRef.current = groundFlames;
     scene.add(groundFlames);
 
-    // 6. Dragon Fire Spiral (Helix)
-    const spiralCount = isMobile ? 150 : 400;
+    // Dragon Fire Spiral (Helix)
+    const spiralCount = isMobile ? 200 : 500;
     const spiralGeo = new THREE.BufferGeometry();
     const sPos = new Float32Array(spiralCount * 3);
     spiralGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
     const spiralMat = new THREE.PointsMaterial({
-      color: 0xffaa00,
-      size: 0.08,
+      color: 0xffcc00,
+      size: 0.07,
       transparent: true,
-      opacity: 0.9,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending
     });
     const dragonFireSpiral = new THREE.Points(spiralGeo, spiralMat);
     dragonFireSpiralRef.current = dragonFireSpiral;
     scene.add(dragonFireSpiral);
 
-    // 7. Ambient Sparks (Upward Embers)
-    const sparkCount = isMobile ? 60 : 150;
+    // Ambient Golden Sparks
+    const sparkCount = isMobile ? 50 : 100;
     const sparkGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(sparkCount * 3);
     for (let i = 0; i < sparkCount; i++) {
-      pPos[i * 3] = (Math.random() - 0.5) * 20;
-      pPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
-      pPos[i * 3 + 2] = (Math.random() - 0.5) * 20;
+      pPos[i * 3] = (Math.random() - 0.5) * 15;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 15;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 15;
     }
     sparkGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
     const sparkMat = new THREE.PointsMaterial({
-      color: 0xffcc00,
-      size: 0.05,
+      color: 0xffaa00,
+      size: 0.04,
       transparent: true,
-      opacity: 0.6,
+      opacity: 0.5,
       blending: THREE.AdditiveBlending
     });
     const ambientSparks = new THREE.Points(sparkGeo, sparkMat);
     ambientSparksRef.current = ambientSparks;
     scene.add(ambientSparks);
 
-    // 8. Event Handlers
     const onMouseMove = (e: MouseEvent) => {
       mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -214,7 +291,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // 9. Animation Loop
     const clock = new THREE.Clock();
     const animate = () => {
       if (isPausedRef.current) {
@@ -226,63 +302,65 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       const time = clock.getElapsedTime();
       const scrollY = scrollRef.current;
 
-      // Cinematic Camera Motion (Orbit + Slight Zoom)
-      const orbitRadius = (isMobile ? 16 : 13) - (scrollY * 0.002);
-      const orbitSpeed = 0.1;
+      // Cinematic Camera Motion
+      const orbitRadius = (isMobile ? 18 : 14) - (scrollY * 0.003);
+      const orbitSpeed = 0.15;
       camera.position.x = Math.sin(time * orbitSpeed) * orbitRadius;
       camera.position.z = Math.cos(time * orbitSpeed) * orbitRadius;
-      camera.position.y = 2 + Math.sin(time * 0.2) * 2 - (scrollY * 0.005);
+      camera.position.y = 2 + Math.sin(time * 0.3) * 1.5 - (scrollY * 0.004);
       camera.lookAt(0, 0, 0);
 
-      // Flickering Golden Light
+      // Flickering Light & Pulsing Glow
       if (goldenLightRef.current) {
-        goldenLightRef.current.intensity = 40 + Math.sin(time * 10) * 15;
-        goldenLightRef.current.position.y = Math.sin(time * 2) * 1.5;
+        goldenLightRef.current.intensity = 50 + Math.sin(time * 8) * 20;
       }
 
-      // Ground Flames (Chaotic rising motion)
+      // Ground Flames
       if (groundFlamesRef.current) {
         const fPosArr = groundFlamesRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < fireCount; i++) {
-          fPosArr[i * 3 + 1] += 0.05 + Math.random() * 0.05; // Rise
-          fPosArr[i * 3] += Math.sin(time * 5 + i) * 0.02; // Turbulence
-          if (fPosArr[i * 3 + 1] > 2) fPosArr[i * 3 + 1] = -4; // Reset
+          fPosArr[i * 3 + 1] += 0.04 + Math.random() * 0.03;
+          fPosArr[i * 3] += Math.sin(time * 3 + i) * 0.01;
+          if (fPosArr[i * 3 + 1] > 3) fPosArr[i * 3 + 1] = -5;
         }
         groundFlamesRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Dragon Fire Spiral (Helix)
+      // Dragon Fire Spiral
       if (dragonFireSpiralRef.current) {
         const sPosArr = dragonFireSpiralRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < spiralCount; i++) {
-          const angle = time * 4 + (i * 0.1);
-          const radius = 1.2 + Math.sin(time + i * 0.2) * 0.3;
-          const verticalFlow = ((i / spiralCount) - 0.5) * 12 + Math.sin(time * 2 + i) * 0.5;
+          const angle = time * 3 + (i * 0.12);
+          const radius = 1.3 + Math.sin(time * 0.5 + i * 0.1) * 0.4;
+          const height = ((i / spiralCount) - 0.5) * 10 + Math.sin(time + i) * 0.2;
           sPosArr[i * 3] = Math.cos(angle) * radius;
-          sPosArr[i * 3 + 1] = verticalFlow;
+          sPosArr[i * 3 + 1] = height;
           sPosArr[i * 3 + 2] = Math.sin(angle) * radius;
         }
         dragonFireSpiralRef.current.geometry.attributes.position.needsUpdate = true;
-        dragonFireSpiralRef.current.rotation.y -= 0.03;
+        dragonFireSpiralRef.current.rotation.y += 0.01;
       }
 
-      // Ambient Embers Drift
+      // Ambient Sparks
       if (ambientSparksRef.current) {
         const pPosArr = ambientSparksRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < sparkCount; i++) {
-          pPosArr[i * 3 + 1] += 0.02;
-          pPosArr[i * 3] += Math.sin(time + i) * 0.01;
-          if (pPosArr[i * 3 + 1] > 10) pPosArr[i * 3 + 1] = -10;
+          pPosArr[i * 3 + 1] += 0.015;
+          pPosArr[i * 3] += Math.sin(time + i) * 0.005;
+          if (pPosArr[i * 3 + 1] > 8) pPosArr[i * 3 + 1] = -8;
         }
         ambientSparksRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Character / Staff Levitation & Mouse Reactivity
+      // Staff levitation & slow rotation
       if (modelRef.current) {
         if (mixerRef.current) mixerRef.current.update(delta);
-        modelRef.current.position.y += Math.sin(time * 0.8) * 0.002;
-        const targetRotY = mouse.current.x * 0.2;
-        modelRef.current.rotation.y = THREE.MathUtils.lerp(modelRef.current.rotation.y, targetRotY, 0.05);
+        modelRef.current.position.y = (isMobile ? -2 : -1.5) + Math.sin(time * 0.7) * 0.15;
+        modelRef.current.rotation.y += 0.005; // Ornate slow showcase rotation
+        
+        // Reactive sway
+        const targetRotZ = mouse.current.x * 0.05;
+        modelRef.current.rotation.z = THREE.MathUtils.lerp(modelRef.current.rotation.z, targetRotZ, 0.02);
       }
 
       composer.render();
