@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -28,7 +27,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
 
-  // Create an intricate ornate texture for the gold and red sections
   const createOrnateTexture = (color: string) => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
@@ -57,14 +55,16 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const createLegendStaff = (scene: THREE.Scene) => {
     const group = new THREE.Group();
     
-    // High-fidelity Materials
+    // High-fidelity Materials with transparency support for fading
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xc89b3c,
       metalness: 1.0,
       roughness: 0.15,
       emissive: 0x443300,
       emissiveIntensity: 0.2,
-      map: createOrnateTexture('#1a1100')
+      map: createOrnateTexture('#1a1100'),
+      transparent: true,
+      opacity: 1
     });
 
     const redLacquerMat = new THREE.MeshStandardMaterial({
@@ -73,14 +73,18 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       roughness: 0.1,
       emissive: 0x220000,
       emissiveIntensity: 0.1,
-      map: createOrnateTexture('#4a0000')
+      map: createOrnateTexture('#4a0000'),
+      transparent: true,
+      opacity: 1
     });
 
     const glowingGoldMat = new THREE.MeshStandardMaterial({
       color: 0xffaa00,
       emissive: 0xffaa00,
       emissiveIntensity: 1.5,
-      metalness: 1.0
+      metalness: 1.0,
+      transparent: true,
+      opacity: 1
     });
 
     // 1. Main Polished Gold Shaft
@@ -113,7 +117,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     bottomCap.position.y = -3.65;
     group.add(bottomCap);
 
-    // 4. Ornamental Rings (Dragon Patterns)
+    // 4. Ornamental Rings
     const ringGeo = new THREE.TorusGeometry(0.14, 0.02, 16, 64);
     const ringPositions = [2.4, 1.2, 0, -1.2, -2.4, 3.25, -3.25];
     ringPositions.forEach(y => {
@@ -181,10 +185,8 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     rimLight.position.set(0, 0, -5);
     scene.add(rimLight);
 
-    // Initialize the Legend Staff
     createLegendStaff(scene);
 
-    // 1. Global Drifting Golden Sparks
     const sparkCount = isMobile ? 80 : 200;
     const sparkGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(sparkCount * 3);
@@ -205,7 +207,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     ambientSparksRef.current = ambientSparks;
     scene.add(ambientSparks);
 
-    // 2. Center Magical Burst Particles
     const burstCount = 50;
     const burstGeo = new THREE.BufferGeometry();
     const bPos = new Float32Array(burstCount * 3);
@@ -240,6 +241,26 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       const time = clock.getElapsedTime();
       const scrollY = scrollRef.current;
 
+      // Staff Fading Logic: Fade out as user scrolls towards the main title reveal
+      // VULNIX 2.0 starts revealing around 600px, so we fade staff between 400px and 900px
+      const fadeStart = 400;
+      const fadeEnd = 900;
+      const staffFadeFactor = Math.max(0, 1 - (scrollY - fadeStart) / (fadeEnd - fadeStart));
+      
+      if (modelRef.current) {
+        modelRef.current.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.material.opacity = staffFadeFactor;
+            // Also reduce emissive intensity so it doesn't bloom while invisible
+            if (child.material.emissiveIntensity !== undefined) {
+              child.material.emissiveIntensity = Math.min(1.5, child.material.emissiveIntensity) * staffFadeFactor;
+            }
+          }
+        });
+        modelRef.current.position.y = Math.sin(time * 0.6) * 0.2 - (scrollY * 0.001);
+        modelRef.current.rotation.y += 0.004;
+      }
+
       // Cinematic Camera Orbit
       const orbitSpeed = 0.12;
       const orbitRadius = (isMobile ? 11 : 8.5) + (scrollY * 0.001);
@@ -248,9 +269,9 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       camera.position.y = -1 + Math.sin(time * 0.3) * 0.4 - (scrollY * 0.002);
       camera.lookAt(0, 0, 0);
 
-      // Flickering & Pulsing Center Light
+      // Flickering & Pulsing Center Light - also affected by staff fade
       if (goldenLightRef.current) {
-        goldenLightRef.current.intensity = 35 + Math.sin(time * 5) * 15;
+        goldenLightRef.current.intensity = (35 + Math.sin(time * 5) * 15) * staffFadeFactor;
       }
 
       // Ambient Spark Drift
@@ -273,12 +294,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
         }
         centerBurstRef.current.geometry.attributes.position.needsUpdate = true;
         centerBurstRef.current.rotation.y += 0.01;
-      }
-
-      // Staff Levitation & Rotation
-      if (modelRef.current) {
-        modelRef.current.position.y = Math.sin(time * 0.6) * 0.2 - (scrollY * 0.001);
-        modelRef.current.rotation.y += 0.004;
       }
 
       composer.render();

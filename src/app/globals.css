@@ -40,8 +40,30 @@
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline uppercase tracking-[0.2em] font-bold;
-    text-shadow: 0 0 15px rgba(200, 155, 60, 0.2);
   }
+}
+
+/* Mythological Bevel Typography */
+.mythic-bevel-gold {
+  color: hsl(var(--primary));
+  text-shadow: 
+    0 1px 0 #8c6b2e,
+    0 2px 0 #735826,
+    0 3px 0 #5a451e,
+    0 4px 0 #413216,
+    0 0 25px rgba(200, 155, 60, 0.5);
+  filter: drop-shadow(0 0 10px rgba(200, 155, 60, 0.2));
+}
+
+.mythic-bevel-red {
+  color: hsl(var(--secondary));
+  text-shadow: 
+    0 1px 0 #a31c2e,
+    0 2px 0 #8a1727,
+    0 3px 0 #711320,
+    0 4px 0 #580e19,
+    0 0 25px rgba(215, 38, 61, 0.5);
+  filter: drop-shadow(0 0 10px rgba(215, 38, 61, 0.3));
 }
 
 /* Mythological Components */

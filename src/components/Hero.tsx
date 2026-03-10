@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -62,8 +61,10 @@ export const Hero: React.FC<HeroProps> = ({ onRegisterPortal }) => {
             <div className="h-px w-12 bg-primary/50" />
           </div>
           
-          <h1 className="text-6xl md:text-9xl font-black text-primary mb-2 tracking-tighter filter drop-shadow-[0_0_20px_rgba(200,155,60,0.5)] uppercase">
-            VULNIX 2.0
+          <h1 className="text-6xl md:text-[10rem] font-black mb-4 tracking-tighter uppercase relative select-none">
+            <span className="mythic-bevel-gold">VULNI</span>
+            <span className="mythic-bevel-red">X</span>
+            <span className="mythic-bevel-gold ml-4">2.0</span>
           </h1>
           
           <div className="relative inline-block mb-10">
