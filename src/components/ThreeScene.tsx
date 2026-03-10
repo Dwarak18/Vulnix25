@@ -22,13 +22,46 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   
   // Refs for animation and model control
   const mixerRef = useRef<THREE.AnimationMixer | null>(null);
-  const modelRef = useRef<THREE.Group | null>(null);
+  const modelRef = useRef<THREE.Object3D | null>(null);
   const dragonSpiralRef = useRef<THREE.Points | null>(null);
   const isPausedRef = useRef(isPaused);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
+
+  // Helper to create a procedural "Celestial Staff" if GLB is missing
+  const createProceduralStaff = (scene: THREE.Scene) => {
+    const group = new THREE.Group();
+    
+    // The main shaft
+    const geometry = new THREE.CylinderGeometry(0.1, 0.1, 6, 32);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0xc89b3c,
+      metalness: 0.9,
+      roughness: 0.1,
+      emissive: 0xc89b3c,
+      emissiveIntensity: 0.5
+    });
+    const staff = new THREE.Mesh(geometry, material);
+    group.add(staff);
+
+    // Decorative Rings
+    const ringGeo = new THREE.TorusGeometry(0.2, 0.02, 16, 100);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xc89b3c });
+    
+    for (let i = 0; i < 4; i++) {
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.y = (i - 1.5) * 1.5;
+      ring.rotation.x = Math.PI / 2;
+      group.add(ring);
+    }
+
+    group.position.y = 0;
+    scene.add(group);
+    modelRef.current = group;
+    return group;
+  };
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -41,7 +74,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     camera.position.set(0, 2, isMobile ? 12 : 8);
 
     const renderer = new THREE.WebGLRenderer({ 
-      antialias: true,
+      antialias: !isMobile,
       alpha: true, 
       powerPreference: "high-performance" 
     });
@@ -53,7 +86,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5, // strength
+      1.2, // strength
       0.4, // radius
       0.85 // threshold
     );
@@ -66,7 +99,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     const ambientLight = new THREE.AmbientLight(0x221111, 1);
     scene.add(ambientLight);
 
-    const goldenPointLight = new THREE.PointLight(0xc89b3c, 20, 30);
+    const goldenPointLight = new THREE.PointLight(0xc89b3c, 25, 30);
     goldenPointLight.position.set(2, 5, 2);
     scene.add(goldenPointLight);
 
@@ -74,41 +107,44 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     redRimLight.position.set(-5, 2, -5);
     scene.add(redRimLight);
 
-    // 4. Load Wukong GLB Model
+    // 4. Load Wukong GLB Model with Fallback
     const loader = new GLTFLoader();
-    // Assuming the file is in /public/black_myth_wukong_-_sun_wu_kong.glb
-    loader.load('/black_myth_wukong_-_sun_wu_kong.glb', (gltf) => {
-      const model = gltf.scene;
-      modelRef.current = model;
-      
-      // Auto-scaling and centering
-      const box = new THREE.Box3().setFromObject(model);
-      const size = box.getSize(new THREE.Vector3());
-      const maxDim = Math.max(size.x, size.y, size.z);
-      const scale = (isMobile ? 4 : 5) / maxDim;
-      model.scale.set(scale, scale, scale);
-      
-      // Center based on bounding box
-      const center = box.getCenter(new THREE.Vector3());
-      model.position.x = -center.x * scale;
-      model.position.y = (-center.y * scale) + (isMobile ? -1 : 0);
-      model.position.z = -center.z * scale;
-      
-      scene.add(model);
+    loader.load(
+      '/black_myth_wukong_-_sun_wu_kong.glb', 
+      (gltf) => {
+        const model = gltf.scene;
+        modelRef.current = model;
+        
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = (isMobile ? 4 : 5) / maxDim;
+        model.scale.set(scale, scale, scale);
+        
+        const center = box.getCenter(new THREE.Vector3());
+        model.position.x = -center.x * scale;
+        model.position.y = (-center.y * scale) + (isMobile ? -1 : 0);
+        model.position.z = -center.z * scale;
+        
+        scene.add(model);
 
-      // Handle Animations
-      if (gltf.animations && gltf.animations.length > 0) {
-        const mixer = new THREE.AnimationMixer(model);
-        mixerRef.current = mixer;
-        const action = mixer.clipAction(gltf.animations[0]);
-        action.play();
+        if (gltf.animations && gltf.animations.length > 0) {
+          const mixer = new THREE.AnimationMixer(model);
+          mixerRef.current = mixer;
+          const action = mixer.clipAction(gltf.animations[0]);
+          action.play();
+        }
+      }, 
+      undefined, 
+      () => {
+        // Fallback to procedural staff if file is missing (e.g. 404)
+        console.warn('Wukong GLB not found. Invoking Celestial Staff fallback.');
+        createProceduralStaff(scene);
       }
-    }, undefined, (error) => {
-      console.error('An error happened loading the Wukong model:', error);
-    });
+    );
 
     // 5. Dragon Energy Spiral
-    const energyCount = 300;
+    const energyCount = isMobile ? 150 : 300;
     const energyGeo = new THREE.BufferGeometry();
     const energyPos = new Float32Array(energyCount * 3);
     for (let i = 0; i < energyCount; i++) {
@@ -129,7 +165,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     scene.add(energySpiral);
 
     // 6. Ambient Particles (Ash/Embers)
-    const particleCount = isMobile ? 300 : 800;
+    const particleCount = isMobile ? 200 : 500;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
@@ -181,10 +217,10 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
 
       // Model Interactions
       if (modelRef.current) {
-        // Subtle Breathing/Idle if no mixer
         if (!mixerRef.current) {
-          modelRef.current.position.y += Math.sin(time * 1.5) * 0.002;
-          modelRef.current.rotation.y += 0.002;
+          // Subtle breathing/levitation for procedural fallback
+          modelRef.current.position.y = Math.sin(time * 1.5) * 0.2;
+          modelRef.current.rotation.y += 0.005;
         } else {
           mixerRef.current.update(delta);
         }
@@ -237,7 +273,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMouseMove);
-      if (containerRef.current) {
+      if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
