@@ -1,7 +1,11 @@
+
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ThreeSceneProps {
@@ -27,14 +31,13 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.12);
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.08);
 
-    // Adjust camera for mobile
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = isMobile ? 12 : 8;
+    camera.position.z = isMobile ? 12 : 10;
 
     const renderer = new THREE.WebGLRenderer({ 
-      antialias: !isMobile, // Disable antialiasing on mobile for performance
+      antialias: true,
       alpha: true, 
       powerPreference: "high-performance" 
     });
@@ -42,94 +45,124 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
+    // Post Processing
+    const renderScene = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      1.5, // strength
+      0.4, // radius
+      0.85 // threshold
+    );
+    
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+
     const raycaster = new THREE.Raycaster();
 
-    // Ruyi Jingu Bang (Golden Hoop Staff)
+    // Ruyi Jingu Bang
     const staffGroup = new THREE.Group();
     
-    const staffGeo = new THREE.CylinderGeometry(0.1, 0.1, 6, 16);
+    const staffGeo = new THREE.CylinderGeometry(0.12, 0.12, 8, 32);
     const staffMat = new THREE.MeshStandardMaterial({ 
-      color: 0x111111, 
-      metalness: 0.9, 
-      roughness: 0.6,
+      color: 0x050505, 
+      metalness: 1, 
+      roughness: 0.2,
     });
     const staff = new THREE.Mesh(staffGeo, staffMat);
     staffGroup.add(staff);
 
-    const hoopGeo = new THREE.CylinderGeometry(0.14, 0.14, 1.2, 16);
+    const hoopGeo = new THREE.CylinderGeometry(0.16, 0.16, 1.5, 32);
     const hoopMat = new THREE.MeshStandardMaterial({ 
       color: 0xc89b3c, 
       metalness: 1, 
-      roughness: 0.2,
+      roughness: 0.1,
       emissive: 0xc89b3c,
-      emissiveIntensity: 0.3
+      emissiveIntensity: 0.5
     });
     
     const topHoop = new THREE.Mesh(hoopGeo, hoopMat);
-    topHoop.position.y = 2.4;
+    topHoop.position.y = 3.25;
     staffGroup.add(topHoop);
 
     const bottomHoop = topHoop.clone();
-    bottomHoop.position.y = -2.4;
+    bottomHoop.position.y = -3.25;
     staffGroup.add(bottomHoop);
 
-    const detailGeo = new THREE.TorusGeometry(0.16, 0.03, 8, 32);
-    const detailMat = new THREE.MeshStandardMaterial({ color: 0x8c6b2e, metalness: 1 });
+    // Intricate Rings
+    const ringGeo = new THREE.TorusGeometry(0.19, 0.02, 16, 64);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x8c6b2e, metalness: 1 });
     
-    for (let i = 0; i < 4; i++) {
-      const ring = new THREE.Mesh(detailGeo, detailMat);
-      ring.position.y = 1.8 + (i * 0.25);
+    for (let i = 0; i < 6; i++) {
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.y = 2.5 + (i * 0.2);
       ring.rotation.x = Math.PI / 2;
       staffGroup.add(ring);
       
       const bRing = ring.clone();
-      bRing.position.y = -1.8 - (i * 0.25);
+      bRing.position.y = -2.5 - (i * 0.2);
       staffGroup.add(bRing);
-    }
-
-    // Scale staff for mobile visibility
-    if (isMobile) {
-      staffGroup.scale.set(0.8, 0.8, 0.8);
     }
 
     scene.add(staffGroup);
 
-    // Reduced particle count for mobile performance
-    const particleCount = isMobile ? 300 : 800;
+    // Dragon Energy Spiral (Particles)
+    const energyCount = 200;
+    const energyGeo = new THREE.BufferGeometry();
+    const energyPos = new Float32Array(energyCount * 3);
+    for (let i = 0; i < energyCount; i++) {
+      energyPos[i * 3] = 0;
+      energyPos[i * 3 + 1] = 0;
+      energyPos[i * 3 + 2] = 0;
+    }
+    energyGeo.setAttribute('position', new THREE.BufferAttribute(energyPos, 3));
+    const energyMat = new THREE.PointsMaterial({
+      color: 0xc89b3c,
+      size: 0.08,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending
+    });
+    const energySpiral = new THREE.Points(energyGeo, energyMat);
+    scene.add(energySpiral);
+
+    // Ambient Particles (Ash/Embers)
+    const particleCount = isMobile ? 400 : 1200;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const velocities = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
-
-      velocities[i * 3] = (Math.random() - 0.5) * 0.01;
-      velocities[i * 3 + 1] = 0.005 + Math.random() * 0.015;
-      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.01;
+      positions[i * 3] = (Math.random() - 0.5) * 40;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+      velocities[i * 3] = (Math.random() - 0.5) * 0.02;
+      velocities[i * 3 + 1] = 0.01 + Math.random() * 0.03;
+      velocities[i * 3 + 2] = (Math.random() - 0.5) * 0.02;
     }
 
     particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    
     const particleMat = new THREE.PointsMaterial({
       color: 0xc89b3c,
-      size: isMobile ? 0.08 : 0.06,
+      size: isMobile ? 0.05 : 0.04,
       transparent: true,
-      opacity: 0.6,
-      blending: THREE.AdditiveBlending,
-      sizeAttenuation: true
+      opacity: 0.4,
+      blending: THREE.AdditiveBlending
     });
-    
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
+    const ambientParticles = new THREE.Points(particleGeo, particleMat);
+    scene.add(ambientParticles);
 
-    const ambientLight = new THREE.AmbientLight(0x222222, 1);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x111111, 2);
     scene.add(ambientLight);
 
-    const primaryLight = new THREE.PointLight(0xc89b3c, 10, 25);
-    primaryLight.position.set(3, 3, 5);
+    const primaryLight = new THREE.PointLight(0xc89b3c, 15, 30);
+    primaryLight.position.set(5, 5, 5);
     scene.add(primaryLight);
+
+    const rimLight = new THREE.PointLight(0xffffff, 5, 20);
+    rimLight.position.set(-5, 2, -5);
+    scene.add(rimLight);
 
     const onMouseMove = (event: MouseEvent) => {
       mouse.current.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -137,7 +170,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     };
 
     const onClick = () => {
-      clickBurst.current = 1.2;
+      clickBurst.current = 2.0;
     };
 
     const onScroll = () => {
@@ -156,61 +189,60 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
 
       const time = Date.now() * 0.001;
       const scrollY = scrollRef.current;
-      const pageHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollPercent = scrollY / pageHeight;
-      const isAtBottom = scrollPercent > 0.95;
+      const scrollPercent = scrollY / (document.documentElement.scrollHeight - window.innerHeight);
 
+      // Cinematic Camera Orbit
+      const orbitRadius = isMobile ? 12 : 10;
+      const orbitSpeed = 0.15;
+      camera.position.x = Math.sin(time * orbitSpeed) * orbitRadius;
+      camera.position.z = Math.cos(time * orbitSpeed) * orbitRadius;
+      camera.position.y = -scrollY * 0.005 + 2;
+      camera.lookAt(0, -scrollY * 0.005, 0);
+
+      // Staff Interaction & Levitation
       raycaster.setFromCamera(new THREE.Vector2(mouse.current.x, mouse.current.y), camera);
       const intersects = raycaster.intersectObjects(staffGroup.children);
       isHovered.current = intersects.length > 0;
 
-      const baseEmissive = isAtBottom ? 0.1 : (isHovered.current ? 1.5 : 0.3);
-      hoopMat.emissiveIntensity = THREE.MathUtils.lerp(hoopMat.emissiveIntensity, baseEmissive, 0.05);
+      const targetEmissive = isHovered.current ? 3.0 : 0.5;
+      hoopMat.emissiveIntensity = THREE.MathUtils.lerp(hoopMat.emissiveIntensity, targetEmissive, 0.05);
+
+      staffGroup.rotation.y += 0.01;
+      staffGroup.position.y = Math.sin(time * 1.5) * 0.3 - (scrollY * 0.002);
       
-      const targetParticleSize = isAtBottom ? 0.1 : (isHovered.current ? 0.12 : 0.06);
-      particleMat.size = THREE.MathUtils.lerp(particleMat.size, targetParticleSize, 0.05);
+      const targetRotX = mouse.current.y * 0.2;
+      const targetRotZ = -mouse.current.x * 0.2;
+      staffGroup.rotation.x = THREE.MathUtils.lerp(staffGroup.rotation.x, targetRotX, 0.05);
+      staffGroup.rotation.z = THREE.MathUtils.lerp(staffGroup.rotation.z, targetRotZ, 0.05);
 
-      staffGroup.rotation.y += 0.008;
-      const targetRotX = mouse.current.y * (isMobile ? 0.15 : 0.3);
-      const targetRotZ = -mouse.current.x * (isMobile ? 0.15 : 0.3);
-      staffGroup.rotation.x = THREE.MathUtils.lerp(staffGroup.rotation.x, targetRotX + (scrollY * 0.0005), 0.05);
-      staffGroup.rotation.z = THREE.MathUtils.lerp(staffGroup.rotation.z, targetRotZ + (Math.sin(time * 0.5) * 0.1), 0.05);
-      
-      const targetY = isAtBottom ? -8 : Math.sin(time * 0.8) * 0.2;
-      staffGroup.position.y = THREE.MathUtils.lerp(staffGroup.position.y, targetY, 0.03);
+      // Dragon Energy Spiral Update
+      const ePos = energyGeo.attributes.position.array as Float32Array;
+      for (let i = 0; i < energyCount; i++) {
+        const angle = time * 2 + i * 0.1;
+        const radius = 0.5 + Math.sin(time + i * 0.2) * 0.2;
+        ePos[i * 3] = Math.cos(angle) * radius;
+        ePos[i * 3 + 1] = ((i / energyCount) - 0.5) * 10 + Math.sin(time + i) * 0.5;
+        ePos[i * 3 + 2] = Math.sin(angle) * radius;
+      }
+      energyGeo.attributes.position.needsUpdate = true;
 
-      const targetZ = (isMobile ? 12 : 8) - Math.min(scrollY * 0.001, 4);
-      camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.05);
-      camera.position.y = THREE.MathUtils.lerp(camera.position.y, -scrollY * 0.004, 0.05);
-      camera.lookAt(0, -scrollY * 0.004, 0);
-
+      // Ambient Particles Update
       const pPos = particleGeo.attributes.position.array as Float32Array;
       for (let i = 0; i < particleCount; i++) {
-        const speedMult = isAtBottom ? 2.5 : 1;
-        pPos[i * 3 + 1] += velocities[i * 3 + 1] * speedMult;
-        pPos[i * 3] += velocities[i * 3] + Math.sin(time + i) * 0.002;
-        pPos[i * 3 + 2] += velocities[i * 3 + 2];
-
+        pPos[i * 3 + 1] += velocities[i * 3 + 1];
+        pPos[i * 3] += velocities[i * 3] + Math.sin(time + i) * 0.005;
+        
         if (clickBurst.current > 0) {
-          const dirX = pPos[i * 3];
-          const dirY = pPos[i * 3 + 1];
-          const dirZ = pPos[i * 3 + 2];
-          const dist = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ) || 1;
-          pPos[i * 3] += (dirX / dist) * clickBurst.current * 0.2;
-          pPos[i * 3 + 1] += (dirY / dist) * clickBurst.current * 0.2;
-          pPos[i * 3 + 2] += (dirZ / dist) * clickBurst.current * 0.2;
+          pPos[i * 3] += (pPos[i * 3] / 5) * clickBurst.current;
+          pPos[i * 3 + 1] += (pPos[i * 3 + 1] / 5) * clickBurst.current;
         }
 
-        if (pPos[i * 3 + 1] > 20) {
-          pPos[i * 3] = (Math.random() - 0.5) * 40;
-          pPos[i * 3 + 1] = -20;
-          pPos[i * 3 + 2] = (Math.random() - 0.5) * 40;
-        }
+        if (pPos[i * 3 + 1] > 20) pPos[i * 3 + 1] = -20;
       }
-      
-      if (clickBurst.current > 0) clickBurst.current -= 0.05;
+      if (clickBurst.current > 0) clickBurst.current -= 0.1;
       particleGeo.attributes.position.needsUpdate = true;
-      renderer.render(scene, camera);
+
+      composer.render();
       frameId.current = requestAnimationFrame(animate);
     };
 
@@ -220,6 +252,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', handleResize);
 
@@ -233,14 +266,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
         containerRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      staffGeo.dispose();
-      staffMat.dispose();
-      hoopGeo.dispose();
-      hoopMat.dispose();
-      detailGeo.dispose();
-      detailMat.dispose();
-      particleGeo.dispose();
-      particleMat.dispose();
+      composer.dispose();
     };
   }, [isMobile]);
 
