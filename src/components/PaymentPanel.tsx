@@ -16,7 +16,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { motion } from 'framer-motion';
 
 // Replace this with your actual Google Apps Script Web App URL
-const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWWGDo8kAggP5SHYM7rPfwejNaFFcULkp2r-kkjuoIassb084OE0vSoOfT5suKYab3/exec";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9cWXT64vEkw5DPuA2Auh5SuLkkzxqpB7kdxt6goC9VwRaL4QH8qxoEYPnWHf8BZHk/exec";
 
 interface PaymentPanelProps {
   registrationData: any;
@@ -65,22 +65,15 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
 
       console.log("Sending registration to Google Sheets:", sheetPayload);
 
-      try {
-        await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(sheetPayload)
-        });
-      } catch (sheetError) {
-        console.warn("Google Sheets sync failed:", sheetError);
-        toast({ 
-          title: "Sync Error", 
-          description: "Failed to sync registration with Google Sheets.", 
-          variant: "destructive" 
-        });
-      }
+      // Fire and forget fetch to avoid CORS hang with Google Apps Script
+      // mode: "no-cors" is required as GAS does not support proper CORS for JSON POSTs
+      fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(sheetPayload)
+      }).catch(sheetError => {
+        console.warn("Google Sheets background sync failed:", sheetError);
+      });
 
       setCompleted(true);
       toast({ 
