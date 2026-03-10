@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -151,7 +150,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
               width: '150px',
               height: '150px',
               background: isHovered 
-                ? `radial-gradient(circle, ${event.isCreative ? 'rgba(122, 30, 30, 0.15)' : 'rgba(200, 155, 60, 0.15)'} 0%, transparent 70%)`
+                ? `radial-gradient(circle, ${event.isCreative ? 'rgba(215, 38, 61, 0.15)' : 'rgba(200, 155, 60, 0.15)'} 0%, transparent 70%)`
                 : 'transparent',
               transform: 'translate(-50%, -50%)',
               filter: 'blur(20px)',
@@ -168,7 +167,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
         <h4 className={cn(
           "text-xl md:text-2xl font-headline tracking-widest mb-2 transition-all duration-500",
           event.isCreative 
-            ? "text-secondary/90 group-hover:text-secondary group-hover:drop-shadow-[0_0_10px_rgba(122,30,30,0.4)]" 
+            ? "text-secondary/90 group-hover:text-secondary group-hover:drop-shadow-[0_0_10px_rgba(215,38,61,0.4)]" 
             : "text-primary/90 group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(200,155,60,0.3)]"
         )}>
           {event.title}
@@ -216,8 +215,8 @@ const LegendPanel = () => {
           </div>
           <div className="flex items-center gap-4 group/item cursor-default">
             <motion.div 
-              whileHover={{ scale: 1.2, boxShadow: "0 0 15px rgba(122, 30, 30, 0.6)" }}
-              className="w-4 h-4 rounded-full bg-secondary shadow-[0_0_10px_rgba(122,30,30,0.4)] transition-shadow" 
+              whileHover={{ scale: 1.2, boxShadow: "0 0 15px rgba(215, 38, 61, 0.6)" }}
+              className="w-4 h-4 rounded-full bg-secondary shadow-[0_0_10px_rgba(215,38,61,0.4)] transition-shadow" 
             />
             <span className="text-xs font-headline tracking-widest text-muted-foreground group-hover/item:text-secondary transition-colors">
               Creative Trials
