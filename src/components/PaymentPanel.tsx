@@ -28,7 +28,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
   const [completed, setCompleted] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handlePaymentSubmit = async () => {
+  const handlePaymentSubmit = () => {
     if (!txnId || txnId.trim().length < 6) {
       toast({ 
         title: "Tribute Invalid", 
@@ -47,54 +47,48 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
       createdAt: serverTimestamp() 
     };
 
-    try {
-      // Step 1: Save to Firestore
-      const docRef = doc(db, 'registrations', teamId);
-      await setDoc(docRef, finalData);
+    // Step 1: Save to Firestore (Non-blocking/Optimistic)
+    const docRef = doc(db, 'registrations', teamId);
+    setDoc(docRef, finalData)
+      .catch(async (serverError) => {
+        // Create the rich, contextual error asynchronously.
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'create',
+          requestResourceData: finalData,
+        });
 
-      // Step 2: Sync to Google Sheets
-      const sheetPayload = {
-        teamId: finalData.teamId,
-        teamName: finalData.teamName,
-        events: finalData.events,
-        eventCount: finalData.eventCount,
-        teamSize: finalData.teamSize,
-        members: finalData.members,
-        transactionID: txnId
-      };
-
-      console.log("Sending registration to Google Sheets:", sheetPayload);
-
-      // Fire and forget fetch to avoid CORS hang with Google Apps Script
-      // mode: "no-cors" is required as GAS does not support proper CORS for JSON POSTs
-      fetch(GOOGLE_SHEETS_WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(sheetPayload)
-      }).catch(sheetError => {
-        console.warn("Google Sheets background sync failed:", sheetError);
+        // Emit the error with the global error emitter
+        errorEmitter.emit('permission-error', permissionError);
       });
 
-      setCompleted(true);
-      toast({ 
-        title: "Tribute Accepted", 
-        description: "Your verification is underway. Patience is the root of wisdom." 
-      });
-    } catch (dbError: any) {
-      const permissionError = new FirestorePermissionError({
-        path: `registrations/${teamId}`,
-        operation: 'create',
-        requestResourceData: finalData,
-      });
-      errorEmitter.emit('permission-error', permissionError);
-      toast({ 
-        title: "Spirit Interruption", 
-        description: "Failed to seal your tribute. Try again.", 
-        variant: "destructive" 
-      });
-    } finally {
-      setIsUpdating(false);
-    }
+    // Step 2: Sync to Google Sheets (Non-blocking "Fire and Forget")
+    const sheetPayload = {
+      teamId: finalData.teamId,
+      teamName: finalData.teamName,
+      events: finalData.events,
+      eventCount: finalData.eventCount,
+      teamSize: finalData.teamSize,
+      members: finalData.members,
+      transactionID: txnId
+    };
+
+    fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(sheetPayload)
+    }).catch(sheetError => {
+      console.warn("Google Sheets background sync failed:", sheetError);
+    });
+
+    // Step 3: Immediate UI Success
+    // We don't await the above calls so the UI feels instant and doesn't get stuck on network/CORS issues
+    setCompleted(true);
+    setIsUpdating(false);
+    toast({ 
+      title: "Tribute Accepted", 
+      description: "Your verification is underway. Patience is the root of wisdom." 
+    });
   };
 
   if (completed) {
