@@ -35,7 +35,7 @@ const SCHEDULE_DATA = [
     events: [
       { title: "Paper Presentation", subtitle: "Celestial Paper Expo" },
       { title: "Startup Expo", subtitle: "Project & Innovation Showcase" },
-      { title: "Fireless Cooking", subtitle: "Alchemy of Taste" }
+      { title: "Fireless Cooking", subtitle: "Alchemy of Taste", isCreative: true }
     ] 
   },
   { 
@@ -43,8 +43,8 @@ const SCHEDULE_DATA = [
     icon: <Sparkles size={20} />,
     events: [
       { title: "Prompt Engineering", subtitle: "Whispering Prompt Challenge" },
-      { title: "Photography", subtitle: "The Third Eye Contest" },
-      { title: "Short Film", subtitle: "Shadow Sagas Presentation" }
+      { title: "Photography", subtitle: "The Third Eye Contest", isCreative: true },
+      { title: "Short Film", subtitle: "Shadow Sagas Presentation", isCreative: true }
     ] 
   },
   { 
@@ -52,7 +52,7 @@ const SCHEDULE_DATA = [
     icon: <Zap size={20} />,
     events: [
       { title: "Web Weaver Trial", subtitle: "Website Prompt Engineering" },
-      { title: "Trial of Strategy", subtitle: "Chess, Carrom & Ludo Arena" }
+      { title: "Trial of Strategy", subtitle: "Chess, Carrom & Ludo Arena", isCreative: true }
     ] 
   },
   { 
@@ -60,8 +60,8 @@ const SCHEDULE_DATA = [
     icon: <Sword size={20} />,
     events: [
       { title: "Spirit Debugging", subtitle: "Shadow Debugging Trial" },
-      { title: "Musical Trivia", subtitle: "Guess the Song Challenge" },
-      { title: "Strategy Continued", subtitle: "Board Game Finals" }
+      { title: "Musical Trivia", subtitle: "Guess the Song Challenge", isCreative: true },
+      { title: "Strategy Continued", subtitle: "Board Game Finals", isCreative: true }
     ] 
   },
   { 
@@ -107,7 +107,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
     const y = e.clientY - rect.top;
     setMousePos({ x, y });
 
-    // Emit particles occasionally
+    // Emit particles occasionally - limited to 15 per hover for performance
     if (Math.random() > 0.85 && particles.length < 15) {
       const id = particleIdCounter.current++;
       setParticles(prev => [...prev, { id, x, y }]);
@@ -152,7 +152,9 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
               top: mousePos.y,
               width: '150px',
               height: '150px',
-              background: 'radial-gradient(circle, rgba(200, 155, 60, 0.15) 0%, transparent 70%)',
+              background: isHovered 
+                ? `radial-gradient(circle, ${event.isCreative ? 'rgba(122, 30, 30, 0.15)' : 'rgba(200, 155, 60, 0.15)'} 0%, transparent 70%)`
+                : 'transparent',
               transform: 'translate(-50%, -50%)',
               filter: 'blur(20px)',
             }}
@@ -166,7 +168,12 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
       ))}
 
       <div className="relative z-10">
-        <h4 className="text-xl md:text-2xl font-headline tracking-widest mb-2 text-primary/90 transition-colors group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(200,155,60,0.3)]">
+        <h4 className={cn(
+          "text-xl md:text-2xl font-headline tracking-widest mb-2 transition-all duration-500",
+          event.isCreative 
+            ? "text-secondary/90 group-hover:text-secondary group-hover:drop-shadow-[0_0_10px_rgba(122,30,30,0.4)]" 
+            : "text-primary/90 group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(200,155,60,0.3)]"
+        )}>
           {event.title}
         </h4>
         <p className="text-muted-foreground font-body italic text-sm md:text-base leading-relaxed">
@@ -183,7 +190,7 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
 
       {/* Background Rune Watermark */}
       <div className="absolute -bottom-4 -right-4 text-primary/5 text-6xl font-headline select-none pointer-events-none">
-        道
+        {event.isCreative ? "藝" : "道"}
       </div>
     </motion.div>
   );
