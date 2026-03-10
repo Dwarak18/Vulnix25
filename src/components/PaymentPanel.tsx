@@ -16,7 +16,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { motion } from 'framer-motion';
 
 // Replace this with your actual Google Apps Script Web App URL
-const GOOGLE_SHEETS_WEB_APP_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWWGDo8kAggP5SHYM7rPfwejNaFFcULkp2r-kkjuoIassb084OE0vSoOfT5suKYab3/exec";
 
 interface PaymentPanelProps {
   registrationData: any;
@@ -54,26 +54,32 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
 
       // Step 2: Sync to Google Sheets
       const sheetPayload = {
-        teamID: finalData.teamId,
+        teamId: finalData.teamId,
         teamName: finalData.teamName,
-        events: finalData.events.join(", "),
+        events: finalData.events,
         eventCount: finalData.eventCount,
         teamSize: finalData.teamSize,
-        members: finalData.members.map((m: any) => `${m.name} (${m.email})`).join(" | "),
+        members: finalData.members,
         transactionID: txnId
       };
+
+      console.log("Sending registration to Google Sheets:", sheetPayload);
 
       try {
         await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
           method: "POST",
-          mode: 'no-cors', // Standard Apps Script behavior
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(sheetPayload)
         });
       } catch (sheetError) {
-        console.warn("Google Sheets sync failed, but record saved to Firestore.", sheetError);
+        console.warn("Google Sheets sync failed:", sheetError);
+        toast({ 
+          title: "Sync Error", 
+          description: "Failed to sync registration with Google Sheets.", 
+          variant: "destructive" 
+        });
       }
 
       setCompleted(true);
