@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -10,6 +11,7 @@ import { RegistrationForm } from '@/components/RegistrationForm';
 import { FogPortal } from '@/components/FogPortal';
 import { BackgroundRunes } from '@/components/BackgroundRunes';
 import { Toaster } from '@/components/ui/toaster';
+import Link from 'next/link';
 
 export default function Home() {
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -59,7 +61,7 @@ export default function Home() {
       {/* Cinematic Portal Overlay */}
       <FogPortal isVisible={isTransitioning} />
 
-      {/* Immersive 3D Background - Paused during transition or when registration is fully focused for performance */}
+      {/* Immersive 3D Background */}
       <ThreeScene isPaused={isTransitioning} />
       
       {/* Atmospheric Background Elements */}
@@ -71,6 +73,7 @@ export default function Home() {
         <div className="hidden md:flex gap-8 text-xs font-headline tracking-widest text-primary/70 pointer-events-auto">
           <a href="#about" className="hover:text-primary transition-colors">LEGEND</a>
           <a href="#events" className="hover:text-primary transition-colors">TRIALS</a>
+          <Link href="/schedule" className="hover:text-primary transition-colors">CHRONICLE</Link>
           <a href="#registration" className="hover:text-primary transition-colors">SCROLL</a>
         </div>
       </nav>
@@ -91,7 +94,6 @@ export default function Home() {
           viewport={{ once: false, margin: "-100px" }}
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative z-10"
-          style={{ willChange: 'transform, opacity' }}
         >
           <div className="h-px w-24 bg-gradient-to-r from-transparent via-primary to-transparent mb-12 mx-auto" />
           <h2 className="text-5xl md:text-8xl text-primary font-headline tracking-[0.3em] gold-glow-text uppercase">
