@@ -107,7 +107,6 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
     const y = e.clientY - rect.top;
     setMousePos({ x, y });
 
-    // Emit particles occasionally - limited to 15 per hover for performance
     if (Math.random() > 0.85 && particles.length < 15) {
       const id = particleIdCounter.current++;
       setParticles(prev => [...prev, { id, x, y }]);
@@ -139,7 +138,6 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
       )}
       style={{ perspective: "1000px" }}
     >
-      {/* Dynamic Cursor Glow */}
       <AnimatePresence>
         {isHovered && (
           <motion.div
@@ -162,7 +160,6 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
         )}
       </AnimatePresence>
 
-      {/* Hover Particles */}
       {particles.map(p => (
         <EmberParticle key={p.id} x={p.x} y={p.y} />
       ))}
@@ -188,9 +185,47 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
         )}
       </div>
 
-      {/* Background Rune Watermark */}
       <div className="absolute -bottom-4 -right-4 text-primary/5 text-6xl font-headline select-none pointer-events-none">
         {event.isCreative ? "藝" : "道"}
+      </div>
+    </motion.div>
+  );
+};
+
+const LegendPanel = () => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 1 }}
+      className="max-w-xl mx-auto mb-16 px-4"
+    >
+      <h3 className="text-sm font-headline tracking-[0.3em] text-primary/60 uppercase text-center mb-6">
+        Legend of the Trials
+      </h3>
+      <div className="stone-tablet p-6 ornate-border shadow-2xl relative overflow-hidden group">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 md:gap-16 relative z-10">
+          <div className="flex items-center gap-4 group/item cursor-default">
+            <motion.div 
+              whileHover={{ scale: 1.2, boxShadow: "0 0 15px rgba(200, 155, 60, 0.6)" }}
+              className="w-4 h-4 rounded-full bg-primary shadow-gold-glow/40 transition-shadow" 
+            />
+            <span className="text-xs font-headline tracking-widest text-muted-foreground group-hover/item:text-primary transition-colors">
+              Technical Trials
+            </span>
+          </div>
+          <div className="flex items-center gap-4 group/item cursor-default">
+            <motion.div 
+              whileHover={{ scale: 1.2, boxShadow: "0 0 15px rgba(122, 30, 30, 0.6)" }}
+              className="w-4 h-4 rounded-full bg-secondary shadow-[0_0_10px_rgba(122,30,30,0.4)] transition-shadow" 
+            />
+            <span className="text-xs font-headline tracking-widest text-muted-foreground group-hover/item:text-secondary transition-colors">
+              Creative Trials
+            </span>
+          </div>
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
       </div>
     </motion.div>
   );
@@ -199,7 +234,6 @@ const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean })
 const TimelineBlock = ({ item, index }: { item: any, index: number }) => {
   return (
     <div className="relative flex flex-col md:flex-row gap-8 mb-24 w-full">
-      {/* Time & Marker */}
       <div className="w-full md:w-48 flex flex-row md:flex-col items-center md:items-end gap-4 shrink-0">
         <div className="text-primary/80 font-headline tracking-widest text-sm md:text-right">
           {item.time}
@@ -209,8 +243,6 @@ const TimelineBlock = ({ item, index }: { item: any, index: number }) => {
           item.isSpecial ? "border-primary/60 shadow-gold-glow/20" : "border-primary/30"
         )}>
           <div className={cn("w-2 h-2 rounded-full", item.isSpecial ? "bg-primary animate-pulse" : "bg-primary/30")} />
-          
-          {/* Vertical Line Segment */}
           <div className="absolute top-10 w-px h-24 bg-gradient-to-b from-primary/30 to-transparent hidden md:block" />
         </div>
         <div className="p-2 rounded-sm bg-primary/5 text-primary/70 border border-primary/10 md:mt-2">
@@ -218,7 +250,6 @@ const TimelineBlock = ({ item, index }: { item: any, index: number }) => {
         </div>
       </div>
 
-      {/* Events Grid */}
       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {item.events.map((event: any, idx: number) => (
           <ScheduleCard key={idx} event={event} isSpecial={item.isSpecial} />
@@ -246,7 +277,6 @@ export default function SchedulePage() {
       <ThreeScene isPaused={false} />
       <BackgroundRunes isPaused={false} />
 
-      {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black to-transparent pointer-events-none">
         <a href="/" className="text-2xl font-black text-primary hover:scale-105 transition-transform pointer-events-auto">VULNIX 2.0</a>
         <div className="flex gap-8 text-xs font-headline tracking-widest text-primary/70 pointer-events-auto">
@@ -254,8 +284,7 @@ export default function SchedulePage() {
         </div>
       </nav>
 
-      {/* Header */}
-      <section className="relative pt-48 pb-24 px-4 flex flex-col items-center text-center">
+      <section className="relative pt-48 pb-12 px-4 flex flex-col items-center text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -272,9 +301,9 @@ export default function SchedulePage() {
         </motion.div>
       </section>
 
-      {/* Timeline Section */}
-      <section className="relative py-24 px-4 max-w-7xl mx-auto">
-        {/* Animated Central Timeline Line */}
+      <LegendPanel />
+
+      <section className="relative py-12 px-4 max-w-7xl mx-auto">
         <div className="absolute left-[44px] md:left-[192px] top-0 bottom-0 w-[2px] bg-primary/10 hidden sm:block">
           <motion.div 
             className="w-full bg-primary/40 shadow-gold-glow/20"
@@ -301,7 +330,6 @@ export default function SchedulePage() {
         </div>
       </section>
 
-      {/* Bottom Proverb */}
       <section className="py-32 text-center relative z-20 overflow-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -317,7 +345,6 @@ export default function SchedulePage() {
         </motion.div>
       </section>
 
-      {/* Footer */}
       <footer className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20">
         <div className="max-w-4xl mx-auto px-4">
           <p>© VULNIX 2.0 SYMPOSIUM — POWERED BY THE ANCIENT SPIRIT OF INNOVATION</p>
