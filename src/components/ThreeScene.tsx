@@ -7,13 +7,20 @@ interface ThreeSceneProps {
   isPaused?: boolean;
 }
 
-export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
+export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouse = useRef({ x: 0, y: 0 });
   const isHovered = useRef(false);
   const clickBurst = useRef(0);
   const scrollRef = useRef(0);
   const frameId = useRef<number | null>(null);
+  
+  // Use a ref for isPaused to avoid re-triggering the entire scene setup effect
+  const isPausedRef = useRef(isPaused);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -25,7 +32,11 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 8;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+    const renderer = new THREE.WebGLRenderer({ 
+      antialias: true, 
+      alpha: true, 
+      powerPreference: "high-performance" 
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
@@ -35,7 +46,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
     // Ruyi Jingu Bang (Golden Hoop Staff)
     const staffGroup = new THREE.Group();
     
-    const staffGeo = new THREE.CylinderGeometry(0.1, 0.1, 6, 16); // Reduced segments for performance
+    const staffGeo = new THREE.CylinderGeometry(0.1, 0.1, 6, 16);
     const staffMat = new THREE.MeshStandardMaterial({ 
       color: 0x111111, 
       metalness: 0.9, 
@@ -64,7 +75,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
     const detailGeo = new THREE.TorusGeometry(0.16, 0.03, 8, 32);
     const detailMat = new THREE.MeshStandardMaterial({ color: 0x8c6b2e, metalness: 1 });
     
-    for (let i = 0; i < 4; i++) { // Reduced detail count
+    for (let i = 0; i < 4; i++) {
       const ring = new THREE.Mesh(detailGeo, detailMat);
       ring.position.y = 1.8 + (i * 0.25);
       ring.rotation.x = Math.PI / 2;
@@ -77,8 +88,8 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
 
     scene.add(staffGroup);
 
-    // Optimized Particles (Reduced count to 1500)
-    const particleCount = 1500;
+    // Optimized Particles
+    const particleCount = 1000;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const velocities = new Float32Array(particleCount * 3);
@@ -132,7 +143,8 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     const animate = () => {
-      if (isPaused) {
+      // Don't stop the loop, just skip rendering logic if paused to maintain smooth transitions
+      if (isPausedRef.current) {
         frameId.current = requestAnimationFrame(animate);
         return;
       }
@@ -212,10 +224,20 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused }) => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mousedown', onClick);
-      containerRef.current?.removeChild(renderer.domElement);
+      if (containerRef.current) {
+        containerRef.current.removeChild(renderer.domElement);
+      }
       renderer.dispose();
+      staffGeo.dispose();
+      staffMat.dispose();
+      hoopGeo.dispose();
+      hoopMat.dispose();
+      detailGeo.dispose();
+      detailMat.dispose();
+      particleGeo.dispose();
+      particleMat.dispose();
     };
-  }, [isPaused]);
+  }, []); // Run only once
 
   return <div ref={containerRef} className="fixed inset-0 -z-10" style={{ willChange: 'transform' }} />;
 };
