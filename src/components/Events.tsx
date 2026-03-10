@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Shield, Brain, Globe, Flag, Terminal, Music, Camera, Film, Utensils, Dice5, Scroll } from 'lucide-react';
 
 const TECH_EVENTS = [
@@ -72,51 +72,88 @@ const NON_TECH_EVENTS = [
 
 const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string, icon: React.ReactNode, color: string }) => {
   const accentColor = color === 'primary' ? 'hsl(var(--primary))' : 'hsl(var(--secondary))';
+  const cardRef = React.useRef(null);
   
+  const { scrollYProgress } = useScroll({
+    target: cardRef,
+    offset: ["start end", "end start"]
+  });
+
+  const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
+
   return (
     <motion.div
+      ref={cardRef}
       initial={{ height: 100, opacity: 0 }}
       whileInView={{ height: 'auto', opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{ duration: 1.2, ease: "easeOut" }}
-      className="relative flex flex-col items-center group mb-12"
+      whileHover={{ scale: 1.02, y: -5, rotateX: 2 }}
+      className="relative flex flex-col items-center group mb-16 perspective-1000"
     >
-      {/* Top Roller */}
-      <div className="w-full h-6 scroll-roller rounded-full z-20 flex items-center justify-between px-4">
-        <div className="w-3 h-3 rounded-full bg-black/40 border border-white/10" />
-        <div className="w-3 h-3 rounded-full bg-black/40 border border-white/10" />
+      {/* Top Roller - Bronze/Gold Metallic */}
+      <div className="w-full h-8 scroll-roller rounded-full z-20 flex items-center justify-between px-6 border-b border-white/5 relative">
+        <div className="w-4 h-4 rounded-full bg-black/60 border border-primary/40 shadow-inner" />
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="w-4 h-4 rounded-full bg-black/60 border border-primary/40 shadow-inner" />
       </div>
 
       {/* Parchment Body */}
-      <div className="w-[95%] parchment-texture border-x-4 border-accent/20 overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-[0_0_30px_rgba(200,155,60,0.1)]">
-        <div className="p-8 md:p-10 space-y-6">
-          <div className="flex items-center gap-6">
+      <div className="w-[96%] parchment-texture border-x-8 border-accent/30 overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-[0_0_40px_rgba(200,155,60,0.15)] group-hover:brightness-110 relative">
+        {/* Parallax Background Texture */}
+        <motion.div 
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{ 
+            backgroundImage: 'url("https://www.transparenttextures.com/patterns/natural-paper.png")',
+            y: bgY
+          }}
+        />
+        
+        <div className="parchment-edge-burn" />
+
+        <div className="p-10 md:p-12 space-y-8 relative z-10">
+          <div className="flex items-center gap-8">
             <div 
-              className="p-4 rounded-sm border transition-all duration-500 group-hover:scale-110"
-              style={{ backgroundColor: `${accentColor}10`, borderColor: `${accentColor}40`, color: accentColor }}
+              className="p-5 rounded-sm border shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:shadow-primary/20"
+              style={{ 
+                backgroundColor: `${accentColor}15`, 
+                borderColor: `${accentColor}50`, 
+                color: accentColor,
+                boxShadow: `inset 0 0 15px ${accentColor}20`
+              }}
             >
               {icon}
             </div>
-            <h4 className="text-2xl md:text-3xl font-headline tracking-widest uppercase transition-colors duration-500 group-hover:text-primary" style={{ color: color === 'primary' ? undefined : accentColor }}>
+            <h4 
+              className="text-3xl md:text-4xl font-headline tracking-widest uppercase transition-all duration-500 group-hover:text-primary drop-shadow-md" 
+              style={{ color: color === 'primary' ? undefined : accentColor }}
+            >
               {title}
             </h4>
           </div>
-          <p className="text-muted-foreground font-body text-lg leading-relaxed italic border-l-2 pl-6" style={{ borderColor: `${accentColor}30` }}>
+          <p 
+            className="text-white/80 font-body text-xl leading-relaxed italic border-l-4 pl-8 drop-shadow-sm" 
+            style={{ borderColor: `${accentColor}40` }}
+          >
             {desc}
           </p>
         </div>
         
         {/* Subtle Watermark Icon */}
-        <div className="absolute bottom-4 right-4 opacity-5 group-hover:opacity-10 transition-opacity">
+        <div className="absolute bottom-6 right-6 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none scale-150">
           {icon}
         </div>
       </div>
 
       {/* Bottom Roller */}
-      <div className="w-full h-6 scroll-roller rounded-full z-20 flex items-center justify-between px-4">
-        <div className="w-3 h-3 rounded-full bg-black/40 border border-white/10" />
-        <div className="w-3 h-3 rounded-full bg-black/40 border border-white/10" />
+      <div className="w-full h-8 scroll-roller rounded-full z-20 flex items-center justify-between px-6 border-t border-black/40 relative">
+        <div className="w-4 h-4 rounded-full bg-black/60 border border-primary/40 shadow-inner" />
+        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <div className="w-4 h-4 rounded-full bg-black/60 border border-primary/40 shadow-inner" />
       </div>
+
+      {/* Outer Glow on Hover */}
+      <div className="absolute -inset-4 bg-primary/5 rounded-xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
     </motion.div>
   );
 };
@@ -129,23 +166,23 @@ export const Events: React.FC = () => {
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
-            className="inline-block p-4 bg-primary/5 rounded-full mb-6 border border-primary/20"
+            className="inline-block p-6 bg-primary/5 rounded-full mb-8 border border-primary/20 shadow-gold-glow"
           >
-             <Scroll className="text-primary animate-pulse" size={48} />
+             <Scroll className="text-primary animate-pulse" size={56} />
           </motion.div>
-          <h2 className="text-5xl md:text-8xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">The Great Trials</h2>
-          <p className="text-muted-foreground text-2xl font-body italic max-w-3xl mx-auto">
+          <h2 className="text-6xl md:text-9xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">The Great Trials</h2>
+          <p className="text-muted-foreground text-2xl md:text-3xl font-body italic max-w-4xl mx-auto opacity-80">
             "Each scroll contains a trial. Unfurl your destiny and face the Sage's wisdom."
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-32">
           {/* Tech Events */}
-          <div className="space-y-12">
-            <div className="flex items-center gap-8 mb-16">
+          <div className="space-y-16">
+            <div className="flex items-center gap-10 mb-20">
               <div className="h-[2px] flex-grow bg-gradient-to-r from-transparent to-primary/60" />
-              <h3 className="text-4xl md:text-5xl font-headline text-primary tracking-widest">Technical Sagas</h3>
-              <div className="h-[2px] w-16 bg-primary/60" />
+              <h3 className="text-5xl md:text-6xl font-headline text-primary tracking-widest whitespace-nowrap">Technical Sagas</h3>
+              <div className="h-[2px] w-24 bg-primary/60" />
             </div>
             <div className="flex flex-col">
               {TECH_EVENTS.map((event, idx) => (
@@ -155,10 +192,10 @@ export const Events: React.FC = () => {
           </div>
 
           {/* Non-Tech Events */}
-          <div className="space-y-12">
-            <div className="flex items-center gap-8 mb-16">
-              <div className="h-[2px] w-16 bg-secondary/60" />
-              <h3 className="text-4xl md:text-5xl font-headline text-secondary tracking-widest">Creative Realms</h3>
+          <div className="space-y-16">
+            <div className="flex items-center gap-10 mb-20">
+              <div className="h-[2px] w-24 bg-secondary/60" />
+              <h3 className="text-5xl md:text-6xl font-headline text-secondary tracking-widest whitespace-nowrap">Creative Realms</h3>
               <div className="h-[2px] flex-grow bg-gradient-to-l from-transparent to-secondary/60" />
             </div>
             <div className="flex flex-col">
