@@ -16,7 +16,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { motion } from 'framer-motion';
 
 // Replace this with your actual Google Apps Script Web App URL
-const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx9cWXT64vEkw5DPuA2Auh5SuLkkzxqpB7kdxt6goC9VwRaL4QH8qxoEYPnWHf8BZHk/exec";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwjheo4AoikWU5Pig5x_AEVvvpV3P2N1z6k4Xicf0lJAkRj5GkGlnJUAGlQUoWwLAlj/exec";
 
 interface PaymentPanelProps {
   registrationData: any;
@@ -172,12 +172,11 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000"></div>
                 <div className="relative bg-white p-6 inline-block rounded-lg shadow-2xl">
                   <Image 
-                    src="https://picsum.photos/seed/vulnix_qr_code/400/400" 
-                    alt="Celestial UPI QR" 
-                    width={250} 
-                    height={250}
-                    className="mx-auto"
-                    data-ai-hint="QR code"
+                     src="/img/upi-qr.png"
+                     alt="VULNIX UPI QR"
+                     width={250}
+                     height={250}
+                     className="mx-auto"
                   />
                 </div>
               </div>

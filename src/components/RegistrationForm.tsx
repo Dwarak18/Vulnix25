@@ -251,7 +251,7 @@ export const RegistrationForm: React.FC = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-card border-primary/40 font-headline">
-                    {["1", "2", "3", "4", "5"].map(s => (
+                    {["1", "2", "3", "4"].map(s => (
                       <SelectItem key={s} value={s}>{s} Disciple{parseInt(s) > 1 ? 's' : ''}</SelectItem>
                     ))}
                   </SelectContent>

@@ -10,7 +10,7 @@
     --card-foreground: 41 54% 90%;
     --popover: 0 0% 7%;
     --popover-foreground: 41 54% 90%;
-    --primary: 41 54% 51%; /* Primary Gold #C89B3C */
+    --primary: 45 85% 55%; /* Royal Imperial Gold #F5BD42 */
     --primary-foreground: 0 0% 4%;
     --secondary: 352 70% 50%; /* Vibrant Mythological Red #D7263D */
     --secondary-foreground: 41 54% 90%;
@@ -22,7 +22,7 @@
     --destructive-foreground: 41 54% 98%;
     --border: 39 50% 25%;
     --input: 39 50% 20%;
-    --ring: 41 54% 51%;
+    --ring: 45 85% 55%;
     --radius: 0.1rem;
   }
 }
@@ -34,7 +34,7 @@
   body {
     @apply bg-background text-foreground selection:bg-primary selection:text-background font-body antialiased overflow-x-hidden;
     background-image: 
-      radial-gradient(circle at 50% 40%, rgba(200, 155, 60, 0.04) 0%, transparent 70%),
+      radial-gradient(circle at 50% 40%, rgba(245, 189, 66, 0.06) 0%, transparent 70%),
       linear-gradient(to bottom, #0a0a0a, #050505);
     background-attachment: fixed;
   }
@@ -47,12 +47,12 @@
 .mythic-bevel-gold {
   color: hsl(var(--primary));
   text-shadow: 
-    0 1px 0 #8c6b2e,
-    0 2px 0 #735826,
-    0 3px 0 #5a451e,
-    0 4px 0 #413216,
-    0 0 25px rgba(200, 155, 60, 0.5);
-  filter: drop-shadow(0 0 10px rgba(200, 155, 60, 0.2));
+    0 1px 0 #b38a2e,
+    0 2px 0 #947226,
+    0 3px 0 #755a1e,
+    0 4px 0 #564216,
+    0 0 30px rgba(245, 189, 66, 0.6);
+  filter: drop-shadow(0 0 12px rgba(245, 189, 66, 0.3));
 }
 
 .mythic-bevel-red {
@@ -94,7 +94,7 @@
 
 .scroll-roller {
   background: linear-gradient(to bottom, #2a1d0f 0%, #8c6b2e 50%, #2a1d0f 100%);
-  border: 1px solid rgba(200, 155, 60, 0.2);
+  border: 1px solid rgba(245, 189, 66, 0.2);
   box-shadow: 
     0 4px 8px rgba(0,0,0,0.6),
     inset 0 1px 1px rgba(255,255,255,0.1);
@@ -126,7 +126,7 @@
 
 @keyframes rune-pulse {
   0%, 100% { filter: drop-shadow(0 0 2px hsl(var(--primary))); opacity: 0.6; }
-  50% { filter: drop-shadow(0 0 12px hsl(var(--primary))); opacity: 1; }
+  50% { filter: drop-shadow(0 0 15px hsl(var(--primary))); opacity: 1; }
 }
 
 .fog-layer {
@@ -139,11 +139,11 @@
 
 .gold-glow-text {
   color: hsl(var(--primary));
-  text-shadow: 0 0 20px rgba(200, 155, 60, 0.6);
+  text-shadow: 0 0 25px rgba(245, 189, 66, 0.7);
 }
 
 .shadow-gold-glow {
-  box-shadow: 0 0 30px rgba(200, 155, 60, 0.2);
+  box-shadow: 0 0 40px rgba(245, 189, 66, 0.25);
 }
 
 .temple-silhouette {
