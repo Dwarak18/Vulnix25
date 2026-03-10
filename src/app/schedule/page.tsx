@@ -1,119 +1,251 @@
 
 "use client"
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { ThreeScene } from '@/components/ThreeScene';
 import { BackgroundRunes } from '@/components/BackgroundRunes';
 import { Toaster } from '@/components/ui/toaster';
-import { Clock, Sword, Flame, Scroll, Sparkles, Trophy, BookOpen, Coffee, Utensils, Zap } from 'lucide-react';
+import { Clock, Sword, Flame, Scroll, Sparkles, Trophy, BookOpen, Coffee, Utensils, Zap, MousePointer2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SCHEDULE_DATA = [
-  { time: "8:00 – 9:00", title: "Arrival & Inscription", subtitle: "Registration", icon: <Scroll size={20} /> },
-  { time: "9:00 – 10:00", title: "Inaugural Ceremony", subtitle: "Opening the Sanctuary Gates", icon: <Flame size={20} /> },
-  { time: "10:00 – 10:15", title: "Brief Respite", subtitle: "Break", icon: <Coffee size={20} /> },
+  { 
+    time: "8:00 – 9:00", 
+    icon: <Scroll size={20} />,
+    events: [{ title: "Arrival & Inscription", subtitle: "Registration & Badge Collection" }] 
+  },
+  { 
+    time: "9:00 – 10:00", 
+    icon: <Flame size={20} />,
+    isSpecial: true,
+    events: [
+      { title: "Inaugural Ceremony", subtitle: "Opening the Sanctuary Gates" },
+      { title: "Trial of Exploitation", subtitle: "Capture The Flag (9:00 AM - 2:00 PM)", highlight: true }
+    ] 
+  },
+  { 
+    time: "10:00 – 10:15", 
+    icon: <Coffee size={20} />,
+    events: [{ title: "Brief Respite", subtitle: "Morning Tea & Networking" }] 
+  },
   { 
     time: "10:15 – 11:00", 
-    title: "The Morning Sagas", 
-    events: ["Paper Presentation", "Startup / Project Expo", "Fireless Cooking"],
-    icon: <BookOpen size={20} />
+    icon: <BookOpen size={20} />,
+    events: [
+      { title: "Paper Presentation", subtitle: "Celestial Paper Expo" },
+      { title: "Startup Expo", subtitle: "Project & Innovation Showcase" },
+      { title: "Fireless Cooking", subtitle: "Alchemy of Taste" }
+    ] 
   },
   { 
     time: "11:00 – 11:45", 
-    title: "Trials of Vision", 
-    events: ["Prompt Engineering Challenge", "Photography Contest", "Short Film"],
-    icon: <Sparkles size={20} />
+    icon: <Sparkles size={20} />,
+    events: [
+      { title: "Prompt Engineering", subtitle: "Whispering Prompt Challenge" },
+      { title: "Photography", subtitle: "The Third Eye Contest" },
+      { title: "Short Film", subtitle: "Shadow Sagas Presentation" }
+    ] 
   },
   { 
     time: "11:45 – 12:30", 
-    title: "Digital Weaving", 
-    events: ["Website Prompt Challenge", "Trial of Strategy (Chess/Carrom/Ludo)"],
-    icon: <Zap size={20} />
+    icon: <Zap size={20} />,
+    events: [
+      { title: "Web Weaver Trial", subtitle: "Website Prompt Engineering" },
+      { title: "Trial of Strategy", subtitle: "Chess, Carrom & Ludo Arena" }
+    ] 
   },
   { 
     time: "12:30 – 1:15", 
-    title: "Shadow Debugging", 
-    events: ["Debugging Challenge", "Guess the Song", "Trial of Strategy Continued"],
-    icon: <Sword size={20} />
+    icon: <Sword size={20} />,
+    events: [
+      { title: "Spirit Debugging", subtitle: "Shadow Debugging Trial" },
+      { title: "Musical Trivia", subtitle: "Guess the Song Challenge" },
+      { title: "Strategy Continued", subtitle: "Board Game Finals" }
+    ] 
   },
-  { time: "1:15 – 2:00", title: "Tribute of Sustenance", subtitle: "Lunch Break", icon: <Utensils size={20} /> },
-  { time: "2:00 – 3:00", title: "Ascension Ceremony", subtitle: "Conclusion & Awards", icon: <Trophy size={20} /> },
+  { 
+    time: "1:15 – 2:00", 
+    icon: <Utensils size={20} />,
+    events: [{ title: "Tribute of Sustenance", subtitle: "Grand Lunch Break" }] 
+  },
+  { 
+    time: "2:00 – 3:00", 
+    icon: <Trophy size={20} />,
+    isSpecial: true,
+    events: [{ title: "Ascension Ceremony", subtitle: "Grand Finale & Awards Distribution" }] 
+  },
 ];
 
-const TimelineItem = ({ data, index, isSpecial = false }: { data: any, index: number, isSpecial?: boolean }) => {
+const EmberParticle = ({ x, y }: { x: number, y: number }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.8, delay: index * 0.1 }}
-      className={`relative flex flex-col md:flex-row items-center gap-8 mb-24 w-full ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}
+      initial={{ opacity: 0.8, scale: 1, x, y }}
+      animate={{ 
+        opacity: 0, 
+        scale: 0, 
+        y: y - 50, 
+        x: x + (Math.random() * 40 - 20) 
+      }}
+      transition={{ duration: 1, ease: "easeOut" }}
+      className="absolute w-1 h-1 bg-primary rounded-full pointer-events-none z-50"
+    />
+  );
+};
+
+const ScheduleCard = ({ event, isSpecial }: { event: any, isSpecial?: boolean }) => {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+  const [particles, setParticles] = useState<{ id: number, x: number, y: number }[]>([]);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const particleIdCounter = useRef(0);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMousePos({ x, y });
+
+    // Emit particles occasionally
+    if (Math.random() > 0.85 && particles.length < 15) {
+      const id = particleIdCounter.current++;
+      setParticles(prev => [...prev, { id, x, y }]);
+      setTimeout(() => {
+        setParticles(prev => prev.filter(p => p.id !== id));
+      }, 1000);
+    }
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setParticles([]);
+      }}
+      whileHover={{ 
+        y: -8, 
+        rotateX: 2, 
+        rotateY: -2,
+        transition: { duration: 0.4, ease: "easeOut" }
+      }}
+      className={cn(
+        "stone-tablet p-6 md:p-8 ornate-border group relative overflow-hidden transition-all duration-500",
+        (isSpecial || event.highlight) ? "border-primary shadow-gold-glow" : "border-primary/20",
+        "cursor-pointer"
+      )}
+      style={{ perspective: "1000px" }}
     >
-      {/* Timeline Node */}
-      <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center justify-center z-10">
-        <div className={`w-12 h-12 rounded-full border-2 bg-background flex items-center justify-center shadow-gold-glow ${isSpecial ? 'border-primary animate-pulse' : 'border-primary/40'}`}>
-          <div className={`w-3 h-3 rounded-full ${isSpecial ? 'bg-primary' : 'bg-primary/40'}`} />
-        </div>
-      </div>
+      {/* Dynamic Cursor Glow */}
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute pointer-events-none z-0"
+            style={{
+              left: mousePos.x,
+              top: mousePos.y,
+              width: '150px',
+              height: '150px',
+              background: 'radial-gradient(circle, rgba(200, 155, 60, 0.15) 0%, transparent 70%)',
+              transform: 'translate(-50%, -50%)',
+              filter: 'blur(20px)',
+            }}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Card Content */}
-      <div className={`w-full md:w-[45%] ${isSpecial ? 'z-20' : 'z-0'}`}>
-        <div className={`stone-tablet p-8 md:p-10 ornate-border group hover:border-primary transition-all duration-500 ${isSpecial ? 'shadow-[0_0_50px_rgba(200,155,60,0.3)] border-primary' : ''}`}>
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-primary font-headline tracking-widest text-sm flex items-center gap-2">
-              <Clock size={16} />
-              {data.time}
-            </span>
-            <div className={`p-2 rounded-sm bg-primary/5 text-primary border border-primary/20`}>
-              {data.icon}
-            </div>
+      {/* Hover Particles */}
+      {particles.map(p => (
+        <EmberParticle key={p.id} x={p.x} y={p.y} />
+      ))}
+
+      <div className="relative z-10">
+        <h4 className={cn(
+          "text-xl md:text-2xl font-headline tracking-widest mb-2 transition-colors",
+          (isSpecial || event.highlight) ? "gold-glow-text text-primary" : "group-hover:text-primary"
+        )}>
+          {event.title}
+        </h4>
+        <p className="text-muted-foreground font-body italic text-sm md:text-base leading-relaxed">
+          {event.subtitle}
+        </p>
+        
+        {(isSpecial || event.highlight) && (
+          <div className="mt-4 pt-4 border-t border-primary/20 flex items-center gap-2">
+            <Sparkles size={14} className="text-primary animate-pulse" />
+            <span className="text-[10px] uppercase tracking-[0.2em] text-primary/70 font-headline">Supreme Trial</span>
           </div>
-          
-          <h3 className={`text-2xl md:text-3xl font-headline tracking-widest mb-2 group-hover:text-primary transition-colors ${isSpecial ? 'gold-glow-text text-primary' : ''}`}>
-            {data.title}
-          </h3>
-          
-          {data.subtitle && (
-            <p className="text-muted-foreground font-body italic text-lg">{data.subtitle}</p>
-          )}
-
-          {data.events && (
-            <ul className="mt-4 space-y-2">
-              {data.events.map((event: string, i: number) => (
-                <li key={i} className="text-muted-foreground font-body flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary/40 mt-2 shrink-0" />
-                  {event}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {isSpecial && (
-            <div className="mt-6 pt-6 border-t border-primary/20">
-              <p className="text-primary font-body italic leading-relaxed">
-                "The ultimate test of wit and infiltration. Only the enlightened shall prevail."
-              </p>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Spacer for Desktop */}
-      <div className="hidden md:block w-[45%]" />
+      {/* Background Rune Watermark */}
+      <div className="absolute -bottom-4 -right-4 text-primary/5 text-6xl font-headline select-none pointer-events-none">
+        道
+      </div>
     </motion.div>
   );
 };
 
-export default function SchedulePage() {
+const TimelineBlock = ({ item, index }: { item: any, index: number }) => {
   return (
-    <main className="relative min-h-screen bg-background overflow-x-hidden">
+    <div className="relative flex flex-col md:flex-row gap-8 mb-24 w-full">
+      {/* Time & Marker */}
+      <div className="w-full md:w-48 flex flex-row md:flex-col items-center md:items-end gap-4 shrink-0">
+        <div className="text-primary font-headline tracking-widest text-sm md:text-right">
+          {item.time}
+        </div>
+        <div className={cn(
+          "w-10 h-10 rounded-full border-2 bg-background flex items-center justify-center relative z-20 shadow-gold-glow transition-transform duration-500 group-hover:scale-110",
+          item.isSpecial ? "border-primary" : "border-primary/40"
+        )}>
+          <div className={cn("w-2 h-2 rounded-full", item.isSpecial ? "bg-primary animate-pulse" : "bg-primary/40")} />
+          
+          {/* Vertical Line Segment */}
+          <div className="absolute top-10 w-px h-24 bg-gradient-to-b from-primary/40 to-transparent hidden md:block" />
+        </div>
+        <div className="p-2 rounded-sm bg-primary/5 text-primary border border-primary/20 md:mt-2">
+          {item.icon}
+        </div>
+      </div>
+
+      {/* Events Grid */}
+      <div className="flex-grow grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {item.events.map((event: any, idx: number) => (
+          <ScheduleCard key={idx} event={event} isSpecial={item.isSpecial} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default function SchedulePage() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  const scaleY = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  return (
+    <main className="relative min-h-screen bg-background overflow-x-hidden" ref={containerRef}>
       <ThreeScene isPaused={false} />
       <BackgroundRunes isPaused={false} />
 
-      {/* Nav */}
-      <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black to-transparent">
-        <a href="/" className="text-2xl font-black text-primary hover:scale-105 transition-transform">VULNIX 2.0</a>
-        <div className="flex gap-8 text-xs font-headline tracking-widest text-primary/70">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black to-transparent pointer-events-none">
+        <a href="/" className="text-2xl font-black text-primary hover:scale-105 transition-transform pointer-events-auto">VULNIX 2.0</a>
+        <div className="flex gap-8 text-xs font-headline tracking-widest text-primary/70 pointer-events-auto">
           <a href="/" className="hover:text-primary transition-colors">BACK TO SANCTUARY</a>
         </div>
       </nav>
@@ -138,35 +270,52 @@ export default function SchedulePage() {
 
       {/* Timeline Section */}
       <section className="relative py-24 px-4 max-w-7xl mx-auto">
-        {/* Central Line */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary/0 via-primary/20 to-primary/0 hidden md:block" />
+        {/* Animated Central Timeline Line */}
+        <div className="absolute left-[44px] md:left-[192px] top-0 bottom-0 w-[2px] bg-primary/10 hidden sm:block">
+          <motion.div 
+            className="w-full bg-primary shadow-gold-glow"
+            style={{ 
+              scaleY, 
+              originY: 0,
+              height: '100%'
+            }} 
+          />
+        </div>
 
-        <div className="flex flex-col items-center">
-          {/* CTF HIGHLIGHT - Inserted into the flow */}
-          <div className="w-full flex justify-center mb-32 relative z-20">
-             <TimelineItem 
-               index={0} 
-               isSpecial={true}
-               data={{
-                 time: "9:00 – 2:00",
-                 title: "Trial of Exploitation",
-                 subtitle: "Capture The Flag (CTF)",
-                 icon: <Sword size={24} />,
-               }} 
-             />
-          </div>
-
-          {/* Main Schedule */}
+        <div className="flex flex-col relative z-10">
           {SCHEDULE_DATA.map((item, idx) => (
-            <TimelineItem key={idx} index={idx + 1} data={item} />
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, delay: idx * 0.1 }}
+            >
+              <TimelineBlock item={item} index={idx} />
+            </motion.div>
           ))}
         </div>
       </section>
 
+      {/* Bottom Proverb */}
+      <section className="py-32 text-center relative z-20 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.5 }}
+          className="max-w-4xl mx-auto px-4"
+        >
+          <div className="h-px w-16 bg-primary/20 mx-auto mb-12" />
+          <p className="text-2xl md:text-4xl text-primary font-headline italic tracking-[0.2em] leading-relaxed gold-glow-text">
+            "Every second is a grain of sand in the hourglass of destiny. Use yours wisely."
+          </p>
+          <div className="h-px w-16 bg-primary/20 mx-auto mt-12" />
+        </motion.div>
+      </section>
+
       {/* Footer */}
-      <footer className="py-24 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20">
+      <footer className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20">
         <div className="max-w-4xl mx-auto px-4">
-          <p className="mb-4 italic">"Time is but a river; your skill is the boat that carries you."</p>
           <p>© VULNIX 2.0 SYMPOSIUM — POWERED BY THE ANCIENT SPIRIT OF INNOVATION</p>
         </div>
       </footer>
@@ -175,3 +324,4 @@ export default function SchedulePage() {
     </main>
   );
 }
+
