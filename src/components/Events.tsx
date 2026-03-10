@@ -111,6 +111,30 @@ const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string,
         
         <div className="parchment-edge-burn" />
 
+        {/* Pulsing Mythic Watermark */}
+        <motion.div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none z-0"
+          animate={{ 
+            opacity: [0.02, 0.08, 0.02],
+            scale: [1.2, 1.4, 1.2]
+          }}
+          transition={{
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+          style={{ 
+            fontSize: '18rem',
+            fontFamily: 'var(--font-headline)',
+            color: accentColor,
+            filter: 'blur(8px)',
+            lineHeight: 1,
+            willChange: 'opacity, transform'
+          }}
+        >
+          {color === 'primary' ? '智' : '藝'}
+        </motion.div>
+
         <div className="p-10 md:p-12 space-y-8 relative z-10">
           <div className="flex items-center gap-8">
             <div 
@@ -139,7 +163,7 @@ const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string,
           </p>
         </div>
         
-        {/* Subtle Watermark Icon */}
+        {/* Subtle Watermark Icon overlay */}
         <div className="absolute bottom-6 right-6 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none scale-150">
           {icon}
         </div>
