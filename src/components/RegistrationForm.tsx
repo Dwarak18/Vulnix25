@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -19,19 +19,27 @@ import { useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Flame, Sparkles, Key, Users, Trophy, ScrollText, AlertCircle } from 'lucide-react';
+import { Flame, Sparkles, Key, Users, Trophy, ScrollText, AlertCircle, Clock } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-const AVAILABLE_EVENTS = [
-  "Paper Presentation / Startup Expo",
-  "Prompt Engineering Challenge",
-  "Website Prompt Challenge",
-  "Debugging Challenge",
-  "Guess The Song",
-  "Photography Contest",
-  "Short Film",
-  "Fireless Cooking",
-  "Chess / Carrom / Ludo",
-  "Capture The Flag (CTF)"
+interface EventTrial {
+  id: string;
+  name: string;
+  start: string; // HH:mm
+  end: string;   // HH:mm
+}
+
+const AVAILABLE_EVENTS: EventTrial[] = [
+  { id: "paper", name: "Paper Presentation / Startup Expo", start: "10:15", end: "11:00" },
+  { id: "fireless", name: "Fireless Cooking", start: "10:15", end: "11:00" },
+  { id: "prompt", name: "Prompt Engineering Challenge", start: "11:00", end: "11:45" },
+  { id: "photo", name: "Photography Contest", start: "11:00", end: "11:45" },
+  { id: "film", name: "Short Film", start: "11:00", end: "11:45" },
+  { id: "web", name: "Website Prompt Challenge", start: "11:45", end: "12:30" },
+  { id: "debugging", name: "Debugging Challenge", start: "12:30", end: "13:15" },
+  { id: "song", name: "Guess The Song", start: "12:30", end: "13:15" },
+  { id: "strategy", name: "Chess / Carrom / Ludo", start: "11:45", end: "13:15" },
+  { id: "ctf", name: "Capture The Flag (CTF)", start: "09:00", end: "14:00" }
 ];
 
 const memberSchema = z.object({
@@ -47,25 +55,28 @@ const formSchema = z.object({
   events: z.array(z.string()).min(1, "Select at least one event"),
   teamSize: z.string(),
   members: z.array(memberSchema)
-}).refine((data) => {
-  if (data.events.includes("Capture The Flag (CTF)") && data.events.length < 2) {
-    return false;
-  }
-  return true;
-}, {
-  message: "CTF participants must register for at least one additional event.",
-  path: ["events"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+// Helper to convert time string to minutes
+const timeToMinutes = (time: string) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
+// Overlap logic: startA < endB AND endA > startB
+const isOverlapping = (e1: EventTrial, e2: EventTrial) => {
+  return timeToMinutes(e1.start) < timeToMinutes(e2.end) && 
+         timeToMinutes(e1.end) > timeToMinutes(e2.start);
+};
 
 export const RegistrationForm: React.FC = () => {
   const db = useFirestore();
   const [teamId, setTeamId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<any>(null);
-  const [proverb, setProverb] = useState('');
-
+  
   useEffect(() => {
     const randomId = Math.floor(1000 + Math.random() * 9000);
     setTeamId(`VULNIX-${randomId}`);
@@ -85,8 +96,38 @@ export const RegistrationForm: React.FC = () => {
     name: "members"
   });
 
-  const selectedEvents = watch("events");
+  const selectedEventIds = watch("events");
   const teamSize = watch("teamSize");
+
+  // Calculate disabled events based on selection
+  const conflictMap = useMemo(() => {
+    const map: Record<string, string | boolean> = {};
+    const selectedEvents = AVAILABLE_EVENTS.filter(e => selectedEventIds.includes(e.id));
+    const hasCtfSelected = selectedEventIds.includes('ctf');
+    const hasOtherSelected = selectedEventIds.length > 0 && !hasCtfSelected;
+
+    AVAILABLE_EVENTS.forEach(event => {
+      // Rule 1: If CTF is selected, everything else is disabled
+      if (hasCtfSelected && event.id !== 'ctf') {
+        map[event.id] = "CTF runs from 9:00 AM to 2:00 PM and cannot be combined with other events.";
+        return;
+      }
+
+      // Rule 2: If anything else is selected, CTF is disabled
+      if (hasOtherSelected && event.id === 'ctf') {
+        map[event.id] = "CTF conflicts with your other selected event times.";
+        return;
+      }
+
+      // Rule 3: Parallel Event Check (Standard Overlap)
+      const conflict = selectedEvents.find(se => se.id !== event.id && isOverlapping(se, event));
+      if (conflict) {
+        map[event.id] = `Conflicts with ${conflict.name}.`;
+      }
+    });
+
+    return map;
+  }, [selectedEventIds]);
 
   useEffect(() => {
     const targetSize = parseInt(teamSize);
@@ -103,12 +144,14 @@ export const RegistrationForm: React.FC = () => {
     }
   }, [teamSize, append, remove, fields.length]);
 
-  const handleEventToggle = (event: string) => {
-    const current = selectedEvents;
-    if (current.includes(event)) {
-      setValue("events", current.filter(e => e !== event));
+  const handleEventToggle = (eventId: string) => {
+    if (conflictMap[eventId]) return;
+
+    const current = selectedEventIds;
+    if (current.includes(eventId)) {
+      setValue("events", current.filter(id => id !== eventId));
     } else {
-      setValue("events", [...current, event]);
+      setValue("events", [...current, eventId]);
     }
   };
 
@@ -118,7 +161,6 @@ export const RegistrationForm: React.FC = () => {
     try {
       const proverbRes = await generateMysticalProverb({ teamName: data.teamName });
       const currentProverb = proverbRes.proverb;
-      setProverb(currentProverb);
 
       const registrationData = {
         ...data,
@@ -126,7 +168,7 @@ export const RegistrationForm: React.FC = () => {
         proverb: currentProverb,
         eventCount: data.events.length,
         status: 'pending',
-        createdAt: new Date().toISOString(), // Using ISO string for Sheet sync compatibility
+        createdAt: new Date().toISOString(),
       };
 
       setSubmittedData(registrationData);
@@ -183,7 +225,7 @@ export const RegistrationForm: React.FC = () => {
                 <div className="relative">
                   <Input 
                     {...register("teamName")} 
-                    className="bg-black/60 border-primary/30 focus:border-primary h-14 text-xl tracking-wider pl-4 rounded-none" 
+                    className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider pl-4 rounded-none" 
                     placeholder="e.g. Wukong's Shadow" 
                   />
                   <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
@@ -212,26 +254,53 @@ export const RegistrationForm: React.FC = () => {
             <div className="mt-12 space-y-6">
               <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
                 <Trophy size={14} className="text-secondary" />
-                Chosen Trials (Multi-select)
+                Chosen Trials (Time Conflict Validation)
               </Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {AVAILABLE_EVENTS.map((event) => (
-                  <div key={event} className="flex items-center space-x-3 bg-black/40 p-4 border border-primary/10 hover:border-primary/40 transition-colors">
-                    <Checkbox 
-                      id={event}
-                      checked={selectedEvents.includes(event)}
-                      onCheckedChange={() => handleEventToggle(event)}
-                      className="border-primary"
-                    />
-                    <label 
-                      htmlFor={event}
-                      className="text-foreground font-body text-sm cursor-pointer select-none"
-                    >
-                      {event}
-                    </label>
-                  </div>
-                ))}
-              </div>
+              <TooltipProvider>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {AVAILABLE_EVENTS.map((event) => {
+                    const isDisabled = conflictMap[event.id];
+                    const isChecked = selectedEventIds.includes(event.id);
+                    
+                    return (
+                      <Tooltip key={event.id}>
+                        <TooltipTrigger asChild>
+                          <div className={`flex items-center space-x-3 p-4 border transition-all duration-300 ${
+                            isDisabled 
+                              ? "opacity-40 bg-black/20 border-white/5 cursor-not-allowed" 
+                              : "bg-black/40 border-primary/10 hover:border-primary/40"
+                          }`}>
+                            <Checkbox 
+                              id={event.id}
+                              checked={isChecked}
+                              onCheckedChange={() => handleEventToggle(event.id)}
+                              disabled={!!isDisabled}
+                              className="border-primary"
+                            />
+                            <div className="flex flex-col flex-grow cursor-pointer" onClick={() => !isDisabled && handleEventToggle(event.id)}>
+                              <label 
+                                htmlFor={event.id}
+                                className={`text-sm font-body cursor-pointer select-none ${isDisabled ? 'text-muted-foreground' : 'text-foreground'}`}
+                              >
+                                {event.name}
+                              </label>
+                              <span className="text-[10px] text-primary/40 flex items-center gap-1">
+                                <Clock size={10} />
+                                {event.start} – {event.end}
+                              </span>
+                            </div>
+                          </div>
+                        </TooltipTrigger>
+                        {isDisabled && !isChecked && (
+                          <TooltipContent className="bg-secondary text-white border-none font-headline text-[10px] tracking-widest">
+                            <p>{isDisabled}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+              </TooltipProvider>
               {errors.events && (
                 <div className="flex items-center gap-2 text-secondary text-sm italic mt-2">
                   <AlertCircle size={14} />
