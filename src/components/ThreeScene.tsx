@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ThreeSceneProps {
   isPaused?: boolean;
@@ -14,8 +15,8 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const clickBurst = useRef(0);
   const scrollRef = useRef(0);
   const frameId = useRef<number | null>(null);
+  const isMobile = useIsMobile();
   
-  // Use a ref for isPaused to avoid re-triggering the entire scene setup effect
   const isPausedRef = useRef(isPaused);
 
   useEffect(() => {
@@ -25,15 +26,15 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Scene setup
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x0a0a0a, 0.12);
 
+    // Adjust camera for mobile
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 8;
+    camera.position.z = isMobile ? 12 : 8;
 
     const renderer = new THREE.WebGLRenderer({ 
-      antialias: true, 
+      antialias: !isMobile, // Disable antialiasing on mobile for performance
       alpha: true, 
       powerPreference: "high-performance" 
     });
@@ -86,10 +87,15 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       staffGroup.add(bRing);
     }
 
+    // Scale staff for mobile visibility
+    if (isMobile) {
+      staffGroup.scale.set(0.8, 0.8, 0.8);
+    }
+
     scene.add(staffGroup);
 
-    // Optimized Particles
-    const particleCount = 1000;
+    // Reduced particle count for mobile performance
+    const particleCount = isMobile ? 300 : 800;
     const particleGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
     const velocities = new Float32Array(particleCount * 3);
@@ -108,7 +114,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     
     const particleMat = new THREE.PointsMaterial({
       color: 0xc89b3c,
-      size: 0.06,
+      size: isMobile ? 0.08 : 0.06,
       transparent: true,
       opacity: 0.6,
       blending: THREE.AdditiveBlending,
@@ -143,7 +149,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     window.addEventListener('scroll', onScroll, { passive: true });
 
     const animate = () => {
-      // Don't stop the loop, just skip rendering logic if paused to maintain smooth transitions
       if (isPausedRef.current) {
         frameId.current = requestAnimationFrame(animate);
         return;
@@ -166,15 +171,15 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       particleMat.size = THREE.MathUtils.lerp(particleMat.size, targetParticleSize, 0.05);
 
       staffGroup.rotation.y += 0.008;
-      const targetRotX = mouse.current.y * 0.3;
-      const targetRotZ = -mouse.current.x * 0.3;
+      const targetRotX = mouse.current.y * (isMobile ? 0.15 : 0.3);
+      const targetRotZ = -mouse.current.x * (isMobile ? 0.15 : 0.3);
       staffGroup.rotation.x = THREE.MathUtils.lerp(staffGroup.rotation.x, targetRotX + (scrollY * 0.0005), 0.05);
       staffGroup.rotation.z = THREE.MathUtils.lerp(staffGroup.rotation.z, targetRotZ + (Math.sin(time * 0.5) * 0.1), 0.05);
       
       const targetY = isAtBottom ? -8 : Math.sin(time * 0.8) * 0.2;
       staffGroup.position.y = THREE.MathUtils.lerp(staffGroup.position.y, targetY, 0.03);
 
-      const targetZ = 8 - Math.min(scrollY * 0.001, 4);
+      const targetZ = (isMobile ? 12 : 8) - Math.min(scrollY * 0.001, 4);
       camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetZ, 0.05);
       camera.position.y = THREE.MathUtils.lerp(camera.position.y, -scrollY * 0.004, 0.05);
       camera.lookAt(0, -scrollY * 0.004, 0);
@@ -237,7 +242,7 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       particleGeo.dispose();
       particleMat.dispose();
     };
-  }, []); // Run only once
+  }, [isMobile]);
 
   return <div ref={containerRef} className="fixed inset-0 -z-10" style={{ willChange: 'transform' }} />;
 };

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const RUNES = ["智", "勇", "義", "禮", "信", "忠", "孝", "廉", "道", "德", "空", "法"];
 
@@ -12,23 +13,25 @@ interface BackgroundRunesProps {
 export const BackgroundRunes: React.FC<BackgroundRunesProps> = ({ isPaused }) => {
   const [mounted, setMounted] = useState(false);
   const [runeInstances, setRuneInstances] = useState<any[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setMounted(true);
-    // Reduced rune count to 8 for better performance
-    const instances = Array.from({ length: 8 }).map((_, i) => ({
+    // Further reduced rune count for mobile
+    const count = isMobile ? 4 : 8;
+    const instances = Array.from({ length: count }).map((_, i) => ({
       id: i,
       char: RUNES[Math.floor(Math.random() * RUNES.length)],
       left: Math.random() * 90 + 5,
       top: Math.random() * 90 + 5,
-      size: Math.random() * 4 + 2,
-      duration: 25 + Math.random() * 15,
+      size: isMobile ? (Math.random() * 2 + 1.5) : (Math.random() * 4 + 2),
+      duration: isMobile ? (30 + Math.random() * 20) : (25 + Math.random() * 15),
       delay: Math.random() * 5,
       xOffset: Math.random() * 40 - 20,
       yOffset: Math.random() * -80 - 40,
     }));
     setRuneInstances(instances);
-  }, []);
+  }, [isMobile]);
 
   if (!mounted || isPaused) return null;
 
@@ -48,7 +51,7 @@ export const BackgroundRunes: React.FC<BackgroundRunesProps> = ({ isPaused }) =>
           }}
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{
-            opacity: [0, 0.1, 0.1, 0],
+            opacity: [0, 0.08, 0.08, 0],
             y: [0, rune.yOffset],
             x: [0, rune.xOffset],
             scale: [0.5, 1, 0.5],
