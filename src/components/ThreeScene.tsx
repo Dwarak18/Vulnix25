@@ -3,7 +3,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
@@ -15,14 +14,13 @@ interface ThreeSceneProps {
 
 export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const mouse = useRef({ x: 0, y: 0 });
   const scrollRef = useRef(0);
   const frameId = useRef<number | null>(null);
   const isMobile = useIsMobile();
   
-  const mixerRef = useRef<THREE.AnimationMixer | null>(null);
-  const modelRef = useRef<THREE.Object3D | null>(null);
+  const modelRef = useRef<THREE.Group | null>(null);
   const ambientSparksRef = useRef<THREE.Points | null>(null);
+  const centerBurstRef = useRef<THREE.Points | null>(null);
   const goldenLightRef = useRef<THREE.PointLight | null>(null);
   const isPausedRef = useRef(isPaused);
 
@@ -37,30 +35,18 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     canvas.height = 512;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Base color
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, 512, 512);
-      
-      // Filigree patterns
       ctx.strokeStyle = '#c89b3c';
-      ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.4;
-      
-      for (let i = 0; i < 40; i++) {
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.3;
+      for (let i = 0; i < 30; i++) {
         ctx.beginPath();
-        ctx.moveTo(Math.random() * 512, Math.random() * 512);
-        ctx.bezierCurveTo(
-          Math.random() * 512, Math.random() * 512,
-          Math.random() * 512, Math.random() * 512,
-          Math.random() * 512, Math.random() * 512
-        );
+        ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * 100, 0, Math.PI * 2);
         ctx.stroke();
       }
-
-      // Border lines
-      ctx.globalAlpha = 0.7;
-      ctx.strokeRect(10, 10, 492, 492);
-      ctx.strokeRect(20, 20, 472, 472);
+      ctx.globalAlpha = 0.5;
+      ctx.strokeRect(5, 5, 502, 502);
     }
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
@@ -68,72 +54,84 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     return texture;
   };
 
-  // Create the specific Sun Wukong staff from the image
-  const createCelestialStaff = (scene: THREE.Scene) => {
+  const createLegendStaff = (scene: THREE.Scene) => {
     const group = new THREE.Group();
     
-    // Materials
+    // High-fidelity Materials
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xc89b3c,
-      metalness: 0.95,
-      roughness: 0.1,
+      metalness: 1.0,
+      roughness: 0.15,
       emissive: 0x443300,
-      emissiveIntensity: 0.3,
+      emissiveIntensity: 0.2,
       map: createOrnateTexture('#1a1100')
     });
 
-    const redMat = new THREE.MeshStandardMaterial({
-      color: 0x8b0000,
-      metalness: 0.4,
-      roughness: 0.2,
-      emissive: 0x330000,
-      emissiveIntensity: 0.2,
+    const redLacquerMat = new THREE.MeshStandardMaterial({
+      color: 0x7A1E1E,
+      metalness: 0.3,
+      roughness: 0.1,
+      emissive: 0x220000,
+      emissiveIntensity: 0.1,
       map: createOrnateTexture('#4a0000')
     });
 
-    // 1. Central Red Shaft
-    const shaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 6, 32);
-    const shaft = new THREE.Mesh(shaftGeo, redMat);
-    group.add(shaft);
-
-    // 2. Ornate Gold Ends (Caps)
-    const capGeo = new THREE.CylinderGeometry(0.15, 0.15, 1.2, 32);
-    
-    const topCap = new THREE.Mesh(capGeo, goldMat);
-    topCap.position.y = 3.6;
-    group.add(topCap);
-
-    const bottomCap = new THREE.Mesh(capGeo, goldMat);
-    bottomCap.position.y = -3.6;
-    group.add(bottomCap);
-
-    // 3. Gold Decorative Rings on the red shaft
-    const ringGeo = new THREE.TorusGeometry(0.13, 0.015, 16, 64);
-    const ringMat = new THREE.MeshStandardMaterial({ 
+    const glowingGoldMat = new THREE.MeshStandardMaterial({
       color: 0xffaa00,
       emissive: 0xffaa00,
-      emissiveIntensity: 1.0,
+      emissiveIntensity: 1.5,
       metalness: 1.0
     });
+
+    // 1. Main Polished Gold Shaft
+    const mainShaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 6.5, 32);
+    const mainShaft = new THREE.Mesh(mainShaftGeo, goldMat);
+    group.add(mainShaft);
+
+    // 2. Deep Red Lacquer Bands
+    const bandHeight = 1.2;
+    const bandGeo = new THREE.CylinderGeometry(0.13, 0.13, bandHeight, 32);
     
-    // Positions derived from the provided image
-    const ringPositions = [2.8, 1.5, 0, -1.5, -2.8];
+    const topBand = new THREE.Mesh(bandGeo, redLacquerMat);
+    topBand.position.y = 1.8;
+    group.add(topBand);
+
+    const bottomBand = new THREE.Mesh(bandGeo, redLacquerMat);
+    bottomBand.position.y = -1.8;
+    group.add(bottomBand);
+
+    // 3. Engraved Gold Caps
+    const capGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.8, 32);
+    const capMat = goldMat.clone();
+    capMat.emissiveIntensity = 0.4;
+
+    const topCap = new THREE.Mesh(capGeo, capMat);
+    topCap.position.y = 3.65;
+    group.add(topCap);
+
+    const bottomCap = new THREE.Mesh(capGeo, capMat);
+    bottomCap.position.y = -3.65;
+    group.add(bottomCap);
+
+    // 4. Ornamental Rings (Dragon Patterns)
+    const ringGeo = new THREE.TorusGeometry(0.14, 0.02, 16, 64);
+    const ringPositions = [2.4, 1.2, 0, -1.2, -2.4, 3.25, -3.25];
     ringPositions.forEach(y => {
-      const ring = new THREE.Mesh(ringGeo, ringMat);
+      const ring = new THREE.Mesh(ringGeo, glowingGoldMat);
       ring.position.y = y;
       ring.rotation.x = Math.PI / 2;
       group.add(ring);
     });
 
-    // 4. Detailed Engravings (Calligraphy / Patterns on the Gold sections)
-    const detailGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.2, 32);
-    const topDetail = new THREE.Mesh(detailGeo, ringMat);
-    topDetail.position.y = 4.1;
-    group.add(topDetail);
+    // 5. Final Detailed Tips
+    const tipGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.15, 32);
+    const topTip = new THREE.Mesh(tipGeo, glowingGoldMat);
+    topTip.position.y = 4.05;
+    group.add(topTip);
 
-    const bottomDetail = new THREE.Mesh(detailGeo, ringMat);
-    bottomDetail.position.y = -4.1;
-    group.add(bottomDetail);
+    const bottomTip = new THREE.Mesh(tipGeo, glowingGoldMat);
+    bottomTip.position.y = -4.05;
+    group.add(bottomTip);
 
     scene.add(group);
     modelRef.current = group;
@@ -144,11 +142,11 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x010101); // Minimalist deep black
-    scene.fog = new THREE.FogExp2(0x010101, 0.05);
+    scene.background = new THREE.Color(0x000000); 
+    scene.fog = new THREE.FogExp2(0x000000, 0.04);
 
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 0, isMobile ? 14 : 10);
+    camera.position.set(0, -1, isMobile ? 12 : 9);
 
     const renderer = new THREE.WebGLRenderer({ 
       antialias: true,
@@ -162,80 +160,73 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
-      1.5, // Radiant mystical bloom
-      0.5, 
-      0.9  
+      1.8, 
+      0.4, 
+      0.85 
     );
     
     const composer = new EffectComposer(renderer);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
     scene.add(ambientLight);
 
-    const goldenPointLight = new THREE.PointLight(0xffaa00, 30, 15);
-    goldenPointLight.position.set(2, 2, 4);
+    const goldenPointLight = new THREE.PointLight(0xffaa00, 40, 12);
+    goldenPointLight.position.set(0, 0, 2);
     scene.add(goldenPointLight);
     goldenLightRef.current = goldenPointLight;
 
-    // Load Wukong or Fallback to Celestial Staff
-    const loader = new GLTFLoader();
-    loader.load(
-      '/black_myth_wukong_-_sun_wu_kong.glb', 
-      (gltf) => {
-        const model = gltf.scene;
-        modelRef.current = model;
-        model.traverse((child) => {
-          if ((child as THREE.Mesh).isMesh) {
-            const m = child as THREE.Mesh;
-            const mat = m.material as THREE.MeshStandardMaterial;
-            mat.emissive = new THREE.Color(0xc89b3c);
-            mat.emissiveIntensity = 0.2;
-          }
-        });
-        const box = new THREE.Box3().setFromObject(model);
-        const scale = (isMobile ? 5 : 7) / box.getSize(new THREE.Vector3()).y;
-        model.scale.set(scale, scale, scale);
-        model.position.y = isMobile ? -2 : -1.5;
-        scene.add(model);
+    const rimLight = new THREE.DirectionalLight(0xff3300, 0.5);
+    rimLight.position.set(0, 0, -5);
+    scene.add(rimLight);
 
-        if (gltf.animations && gltf.animations.length > 0) {
-          mixerRef.current = new THREE.AnimationMixer(model);
-          mixerRef.current.clipAction(gltf.animations[0]).play();
-        }
-      }, 
-      undefined, 
-      () => createCelestialStaff(scene)
-    );
+    // Initialize the Legend Staff
+    createLegendStaff(scene);
 
-    // Floating Golden Ember Particles (Clean, as requested)
-    const sparkCount = isMobile ? 60 : 120;
+    // 1. Global Drifting Golden Sparks
+    const sparkCount = isMobile ? 80 : 200;
     const sparkGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(sparkCount * 3);
     for (let i = 0; i < sparkCount; i++) {
-      pPos[i * 3] = (Math.random() - 0.5) * 15;
-      pPos[i * 3 + 1] = (Math.random() - 0.5) * 15;
-      pPos[i * 3 + 2] = (Math.random() - 0.5) * 15;
+      pPos[i * 3] = (Math.random() - 0.5) * 20;
+      pPos[i * 3 + 1] = (Math.random() - 0.5) * 20;
+      pPos[i * 3 + 2] = (Math.random() - 0.5) * 20;
     }
     sparkGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
     const sparkMat = new THREE.PointsMaterial({
       color: 0xc89b3c,
-      size: 0.035,
+      size: 0.04,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending
     });
     const ambientSparks = new THREE.Points(sparkGeo, sparkMat);
     ambientSparksRef.current = ambientSparks;
     scene.add(ambientSparks);
 
-    const onMouseMove = (e: MouseEvent) => {
-      mouse.current.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    };
+    // 2. Center Magical Burst Particles
+    const burstCount = 50;
+    const burstGeo = new THREE.BufferGeometry();
+    const bPos = new Float32Array(burstCount * 3);
+    for (let i = 0; i < burstCount; i++) {
+      bPos[i * 3] = (Math.random() - 0.5) * 0.5;
+      bPos[i * 3 + 1] = (Math.random() - 0.5) * 2;
+      bPos[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+    }
+    burstGeo.setAttribute('position', new THREE.BufferAttribute(bPos, 3));
+    const burstMat = new THREE.PointsMaterial({
+      color: 0xffaa00,
+      size: 0.06,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending
+    });
+    const centerBurst = new THREE.Points(burstGeo, burstMat);
+    centerBurstRef.current = centerBurst;
+    scene.add(centerBurst);
+
     const onScroll = () => scrollRef.current = window.scrollY;
-    window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('scroll', onScroll, { passive: true });
 
     const clock = new THREE.Clock();
@@ -249,35 +240,45 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       const time = clock.getElapsedTime();
       const scrollY = scrollRef.current;
 
-      // Cinematic Fixed Camera with slight orbit
-      const orbitSpeed = 0.08;
-      const orbitRadius = (isMobile ? 12 : 9) - (scrollY * 0.002);
-      camera.position.x = Math.sin(time * orbitSpeed) * 0.5;
+      // Cinematic Camera Orbit
+      const orbitSpeed = 0.12;
+      const orbitRadius = (isMobile ? 11 : 8.5) + (scrollY * 0.001);
+      camera.position.x = Math.sin(time * orbitSpeed) * 0.8;
       camera.position.z = orbitRadius;
-      camera.position.y = Math.sin(time * 0.2) * 0.5 - (scrollY * 0.003);
+      camera.position.y = -1 + Math.sin(time * 0.3) * 0.4 - (scrollY * 0.002);
       camera.lookAt(0, 0, 0);
 
-      // Flickering Golden Light
+      // Flickering & Pulsing Center Light
       if (goldenLightRef.current) {
-        goldenLightRef.current.intensity = 25 + Math.sin(time * 4) * 10;
+        goldenLightRef.current.intensity = 35 + Math.sin(time * 5) * 15;
       }
 
-      // Drifting Golden Embers
+      // Ambient Spark Drift
       if (ambientSparksRef.current) {
         const pPosArr = ambientSparksRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < sparkCount; i++) {
-          pPosArr[i * 3 + 1] += 0.008;
-          pPosArr[i * 3] += Math.sin(time * 0.3 + i) * 0.004;
-          if (pPosArr[i * 3 + 1] > 7.5) pPosArr[i * 3 + 1] = -7.5;
+          pPosArr[i * 3 + 1] += 0.01;
+          pPosArr[i * 3] += Math.sin(time * 0.4 + i) * 0.005;
+          if (pPosArr[i * 3 + 1] > 10) pPosArr[i * 3 + 1] = -10;
         }
         ambientSparksRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Staff levitation & rotation
+      // Center Burst Animation
+      if (centerBurstRef.current) {
+        const bPosArr = centerBurstRef.current.geometry.attributes.position.array as Float32Array;
+        for (let i = 0; i < burstCount; i++) {
+          bPosArr[i * 3 + 1] += Math.sin(time + i) * 0.002;
+          bPosArr[i * 3] += Math.cos(time + i) * 0.002;
+        }
+        centerBurstRef.current.geometry.attributes.position.needsUpdate = true;
+        centerBurstRef.current.rotation.y += 0.01;
+      }
+
+      // Staff Levitation & Rotation
       if (modelRef.current) {
-        if (mixerRef.current) mixerRef.current.update(delta);
-        modelRef.current.position.y = Math.sin(time * 0.5) * 0.15 - (scrollY * 0.001);
-        modelRef.current.rotation.y += 0.003;
+        modelRef.current.position.y = Math.sin(time * 0.6) * 0.2 - (scrollY * 0.001);
+        modelRef.current.rotation.y += 0.004;
       }
 
       composer.render();
@@ -298,7 +299,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       if (frameId.current) cancelAnimationFrame(frameId.current);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', onMouseMove);
       if (containerRef.current && containerRef.current.contains(renderer.domElement)) {
         containerRef.current.removeChild(renderer.domElement);
       }
@@ -307,5 +307,5 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     };
   }, [isMobile]);
 
-  return <div ref={containerRef} className="fixed inset-0 -z-10" style={{ willChange: 'transform' }} />;
+  return <div ref={containerRef} className="fixed inset-0 -z-10 bg-black" style={{ willChange: 'transform' }} />;
 };
