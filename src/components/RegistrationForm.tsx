@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from '@/hooks/use-toast';
 import { generateMysticalProverb } from '@/ai/flows/ai-powered-mystical-proverb-generator-flow';
 import { PaymentPanel } from './PaymentPanel';
@@ -18,7 +19,20 @@ import { useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { Flame, Sparkles, Key, Users, Trophy, ScrollText } from 'lucide-react';
+import { Flame, Sparkles, Key, Users, Trophy, ScrollText, AlertCircle } from 'lucide-react';
+
+const AVAILABLE_EVENTS = [
+  "Paper Presentation / Startup Expo",
+  "Prompt Engineering Challenge",
+  "Website Prompt Challenge",
+  "Debugging Challenge",
+  "Guess The Song",
+  "Photography Contest",
+  "Short Film",
+  "Fireless Cooking",
+  "Chess / Carrom / Ludo",
+  "Capture The Flag (CTF)"
+];
 
 const memberSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -30,9 +44,17 @@ const memberSchema = z.object({
 
 const formSchema = z.object({
   teamName: z.string().min(2, "Team name is required"),
-  eventSelection: z.string().min(1, "Select an event"),
+  events: z.array(z.string()).min(1, "Select at least one event"),
   teamSize: z.string(),
   members: z.array(memberSchema)
+}).refine((data) => {
+  if (data.events.includes("Capture The Flag (CTF)") && data.events.length < 2) {
+    return false;
+  }
+  return true;
+}, {
+  message: "CTF participants must register for at least one additional event.",
+  path: ["events"],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,7 +67,6 @@ export const RegistrationForm: React.FC = () => {
   const [proverb, setProverb] = useState('');
 
   useEffect(() => {
-    // Generate a mythic ID on mount
     const randomId = Math.floor(1000 + Math.random() * 9000);
     setTeamId(`VULNIX-${randomId}`);
   }, []);
@@ -54,6 +75,7 @@ export const RegistrationForm: React.FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       teamSize: "1",
+      events: [],
       members: [{ name: '', phone: '', email: '', college: '', department: '' }]
     }
   });
@@ -63,9 +85,9 @@ export const RegistrationForm: React.FC = () => {
     name: "members"
   });
 
+  const selectedEvents = watch("events");
   const teamSize = watch("teamSize");
 
-  // Sync members array with teamSize select
   useEffect(() => {
     const targetSize = parseInt(teamSize);
     const currentSize = fields.length;
@@ -81,39 +103,34 @@ export const RegistrationForm: React.FC = () => {
     }
   }, [teamSize, append, remove, fields.length]);
 
+  const handleEventToggle = (event: string) => {
+    const current = selectedEvents;
+    if (current.includes(event)) {
+      setValue("events", current.filter(e => e !== event));
+    } else {
+      setValue("events", [...current, event]);
+    }
+  };
+
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
     try {
-      // Step 1: Generate AI Proverb for the team
       const proverbRes = await generateMysticalProverb({ teamName: data.teamName });
       const currentProverb = proverbRes.proverb;
       setProverb(currentProverb);
 
-      // Step 2: Prepare Registration Data
       const registrationData = {
         ...data,
         teamId,
         proverb: currentProverb,
+        eventCount: data.events.length,
         status: 'pending',
-        createdAt: serverTimestamp(),
+        createdAt: new Date().toISOString(), // Using ISO string for Sheet sync compatibility
       };
 
-      // Step 3: Save to Firestore (Non-blocking as per guidelines)
-      const docRef = doc(db, 'registrations', teamId);
-      
-      setDoc(docRef, registrationData)
-        .catch(async (serverError) => {
-          const permissionError = new FirestorePermissionError({
-            path: docRef.path,
-            operation: 'create',
-            requestResourceData: registrationData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        });
-
-      // Step 4: Show Success and Transition
       setSubmittedData(registrationData);
+      
       toast({
         title: "Inscription Noted",
         description: "Your journey begins. Finalize the tribute.",
@@ -130,7 +147,7 @@ export const RegistrationForm: React.FC = () => {
   };
 
   if (submittedData) {
-    return <PaymentPanel teamId={teamId} proverb={proverb} />;
+    return <PaymentPanel registrationData={submittedData} />;
   }
 
   return (
@@ -156,9 +173,8 @@ export const RegistrationForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-16">
-          {/* Header Configuration */}
           <Card className="stone-tablet border-primary/40 p-10 md:p-16 ornate-border overflow-visible">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div className="space-y-4">
                 <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
                   <Flame size={14} className="text-secondary" />
@@ -173,26 +189,6 @@ export const RegistrationForm: React.FC = () => {
                   <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
                 </div>
                 {errors.teamName && <p className="text-secondary text-sm italic">{errors.teamName.message}</p>}
-              </div>
-
-              <div className="space-y-4">
-                <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
-                  <Trophy size={14} className="text-secondary" />
-                  Chosen Trial
-                </Label>
-                <Select onValueChange={(v) => setValue("eventSelection", v)}>
-                  <SelectTrigger className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider rounded-none">
-                    <SelectValue placeholder="Choose Path" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/40 font-headline">
-                    <SelectItem value="ctf">Capture The Flag</SelectItem>
-                    <SelectItem value="prompt">Prompt Engineering</SelectItem>
-                    <SelectItem value="expo">Paper Expo</SelectItem>
-                    <SelectItem value="debug">Debugging</SelectItem>
-                    <SelectItem value="non-tech">Creative Events</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.eventSelection && <p className="text-secondary text-sm italic">{errors.eventSelection.message}</p>}
               </div>
 
               <div className="space-y-4">
@@ -212,9 +208,39 @@ export const RegistrationForm: React.FC = () => {
                 </Select>
               </div>
             </div>
+
+            <div className="mt-12 space-y-6">
+              <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
+                <Trophy size={14} className="text-secondary" />
+                Chosen Trials (Multi-select)
+              </Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {AVAILABLE_EVENTS.map((event) => (
+                  <div key={event} className="flex items-center space-x-3 bg-black/40 p-4 border border-primary/10 hover:border-primary/40 transition-colors">
+                    <Checkbox 
+                      id={event}
+                      checked={selectedEvents.includes(event)}
+                      onCheckedChange={() => handleEventToggle(event)}
+                      className="border-primary"
+                    />
+                    <label 
+                      htmlFor={event}
+                      className="text-foreground font-body text-sm cursor-pointer select-none"
+                    >
+                      {event}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {errors.events && (
+                <div className="flex items-center gap-2 text-secondary text-sm italic mt-2">
+                  <AlertCircle size={14} />
+                  {errors.events.message}
+                </div>
+              )}
+            </div>
           </Card>
 
-          {/* Dynamic Disciple Panels */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <AnimatePresence mode="popLayout">
               {fields.map((field, index) => (
@@ -224,14 +250,10 @@ export const RegistrationForm: React.FC = () => {
                   initial={{ opacity: 0, y: 40, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  transition={{ 
-                    duration: 0.6, 
-                    ease: [0.16, 1, 0.3, 1],
-                    delay: (index % 2) * 0.1 
-                  }}
+                  transition={{ duration: 0.6, delay: (index % 2) * 0.1 }}
                   className="w-full"
                 >
-                  <Card className="stone-tablet border-accent/40 shadow-gold-glow overflow-hidden transition-all duration-500 hover:shadow-[0_0_40px_rgba(200,155,60,0.2)] hover:border-primary/50 group">
+                  <Card className="stone-tablet border-accent/40 shadow-gold-glow overflow-hidden group">
                     <CardHeader className="border-b border-accent/20 bg-primary/5 p-6 flex flex-row items-center justify-between">
                       <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
                         <div className="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center text-sm font-headline bg-black/40">
@@ -239,37 +261,30 @@ export const RegistrationForm: React.FC = () => {
                         </div>
                         Disciple {index + 1}
                       </CardTitle>
-                      <Sparkles className="text-primary/10 group-hover:text-primary/30 transition-colors" />
                     </CardHeader>
                     <CardContent className="space-y-8 pt-8 p-8">
                       <div className="space-y-3">
                         <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">True Name</Label>
-                        <Input 
-                          {...register(`members.${index}.name`)} 
-                          className="bg-black/40 border-accent/30 h-12 focus:border-primary transition-colors rounded-none placeholder:opacity-20"
-                          placeholder="e.g. Linghun"
-                        />
+                        <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                         {errors.members?.[index]?.name && <p className="text-secondary text-xs">{errors.members[index].name?.message}</p>}
                       </div>
-                      
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Spirit Signal (Phone)</Label>
+                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Phone</Label>
                           <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                         </div>
                         <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Digital Echo (Email)</Label>
+                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Email</Label>
                           <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                         </div>
                       </div>
-
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Academy / College</Label>
+                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">College</Label>
                           <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                         </div>
                         <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Discipline / Dept</Label>
+                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Department</Label>
                           <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                         </div>
                       </div>
@@ -281,22 +296,13 @@ export const RegistrationForm: React.FC = () => {
           </div>
 
           <div className="text-center pt-24">
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-block"
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-primary hover:bg-primary/90 text-black font-black px-24 py-12 text-3xl ornate-border shadow-[0_0_60px_rgba(200,155,60,0.4)] rounded-none transition-all w-full md:w-auto"
             >
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-                className="bg-primary hover:bg-primary/90 text-black font-black px-24 py-12 text-3xl ornate-border shadow-[0_0_60px_rgba(200,155,60,0.4)] rounded-none transition-all w-full md:w-auto"
-              >
-                {isSubmitting ? "ASCENDING..." : "SEAL THE SCROLL"}
-              </Button>
-            </motion.div>
-            <p className="mt-8 text-muted-foreground text-xs uppercase tracking-widest font-headline opacity-50">
-              By sealing the scroll, you accept the Sage's judgement.
-            </p>
+              {isSubmitting ? "ASCENDING..." : "SEAL THE SCROLL"}
+            </Button>
           </div>
         </form>
       </div>

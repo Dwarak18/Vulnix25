@@ -7,59 +7,95 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle2, Sparkles, ShieldCheck, Info } from 'lucide-react';
+import { CheckCircle2, Sparkles, ShieldCheck, Info, CreditCard } from 'lucide-react';
 import Image from 'next/image';
 import { useFirestore } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { motion } from 'framer-motion';
 
+// Replace this with your actual Google Apps Script Web App URL
+const GOOGLE_SHEETS_WEB_APP_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
 interface PaymentPanelProps {
-  teamId: string;
-  proverb?: string;
+  registrationData: any;
 }
 
-export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) => {
+export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) => {
   const db = useFirestore();
   const [txnId, setTxnId] = useState('');
   const [completed, setCompleted] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handlePaymentSubmit = () => {
-    if (!txnId || txnId.length < 6) {
+  const handlePaymentSubmit = async () => {
+    if (!txnId || txnId.trim().length < 6) {
       toast({ 
         title: "Tribute Invalid", 
-        description: "Please enter a valid Transaction UTR (12 digits)", 
+        description: "Please enter a valid Transaction ID", 
         variant: "destructive" 
       });
       return;
     }
 
     setIsUpdating(true);
-    const docRef = doc(db, 'registrations', teamId);
-    const updateData = { txnId, status: 'pending' };
+    const teamId = registrationData.teamId;
+    const finalData = { 
+      ...registrationData, 
+      txnId, 
+      status: 'pending',
+      createdAt: serverTimestamp() 
+    };
 
-    updateDoc(docRef, updateData)
-      .then(() => {
-        setCompleted(true);
-        toast({ 
-          title: "Tribute Accepted", 
-          description: "Your verification is underway. Patience is the root of wisdom." 
+    try {
+      // Step 1: Save to Firestore
+      const docRef = doc(db, 'registrations', teamId);
+      await setDoc(docRef, finalData);
+
+      // Step 2: Sync to Google Sheets
+      const sheetPayload = {
+        teamID: finalData.teamId,
+        teamName: finalData.teamName,
+        events: finalData.events.join(", "),
+        eventCount: finalData.eventCount,
+        teamSize: finalData.teamSize,
+        members: finalData.members.map((m: any) => `${m.name} (${m.email})`).join(" | "),
+        transactionID: txnId
+      };
+
+      try {
+        await fetch(GOOGLE_SHEETS_WEB_APP_URL, {
+          method: "POST",
+          mode: 'no-cors', // Standard Apps Script behavior
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(sheetPayload)
         });
-      })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: updateData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ title: "Spirit Interruption", description: "Failed to seal your tribute. Try again.", variant: "destructive" });
-      })
-      .finally(() => {
-        setIsUpdating(false);
+      } catch (sheetError) {
+        console.warn("Google Sheets sync failed, but record saved to Firestore.", sheetError);
+      }
+
+      setCompleted(true);
+      toast({ 
+        title: "Tribute Accepted", 
+        description: "Your verification is underway. Patience is the root of wisdom." 
       });
+    } catch (dbError: any) {
+      const permissionError = new FirestorePermissionError({
+        path: `registrations/${teamId}`,
+        operation: 'create',
+        requestResourceData: finalData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({ 
+        title: "Spirit Interruption", 
+        description: "Failed to seal your tribute. Try again.", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (completed) {
@@ -93,7 +129,6 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
   return (
     <div className="py-32 px-4 max-w-5xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-        {/* Left: Mystical Blessing & Info */}
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -103,9 +138,8 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
             <Sparkles className="absolute -top-4 -left-4 text-primary animate-pulse" size={32} />
             <h3 className="text-primary font-headline mb-6 uppercase tracking-[0.3em] text-xl">The Sage's Blessing</h3>
             <p className="text-2xl md:text-3xl text-foreground font-body leading-relaxed italic border-l-4 border-primary/40 pl-8">
-              "{proverb || "The path reveals itself only to those who dare to step into the shadow."}"
+              "{registrationData.proverb || "The path reveals itself only to those who dare to step into the shadow."}"
             </p>
-            <p className="mt-8 text-sm text-primary/50 text-right font-headline tracking-widest">— VULNIX ORACLE</p>
           </div>
 
           <Card className="bg-black/40 border-primary/20 p-8 rounded-none">
@@ -114,17 +148,15 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
                 <ShieldCheck className="text-primary" />
               </div>
               <div className="space-y-2">
-                <Label className="text-primary font-headline tracking-widest text-lg block uppercase">Team Identification</Label>
+                <Label className="text-primary font-headline tracking-widest text-lg block uppercase">Team ID</Label>
                 <div className="text-3xl font-code tracking-[0.3em] text-white/90">
-                  {teamId}
+                  {registrationData.teamId}
                 </div>
-                <p className="text-xs text-muted-foreground italic">Keep this secret. It is the key to your trials.</p>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Right: Payment Console */}
         <motion.div
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -133,10 +165,16 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
           <Card className="stone-tablet border-primary/30 rounded-none overflow-hidden ornate-border shadow-2xl">
             <CardHeader className="bg-primary/5 border-b border-primary/20 p-8">
               <CardTitle className="text-3xl text-primary font-headline tracking-widest flex items-center gap-4">
-                Finalize Trials
+                <CreditCard className="text-secondary" />
+                Registration Payment
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-10 p-10 text-center">
+              <div className="space-y-2">
+                <p className="text-2xl text-foreground font-headline">Registration Fee: ₹250</p>
+                <p className="text-sm text-muted-foreground italic">One fee covers all selected trials.</p>
+              </div>
+
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000"></div>
                 <div className="relative bg-white p-6 inline-block rounded-lg shadow-2xl">
@@ -151,25 +189,22 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <p className="text-muted-foreground uppercase tracking-[0.3em] text-sm">Scan to offer your registration fee</p>
-                <div className="h-px w-24 bg-primary/20 mx-auto" />
-              </div>
+              <p className="text-muted-foreground uppercase tracking-[0.3em] text-xs">Scan the QR code and complete the payment.</p>
               
               <div className="space-y-4 text-left">
-                <Label className="text-primary font-headline text-xs tracking-widest uppercase">Transaction UTR (12 Digits)</Label>
+                <Label className="text-primary font-headline text-xs tracking-widest uppercase">Transaction ID / UTR</Label>
                 <Input 
                   value={txnId}
                   onChange={(e) => setTxnId(e.target.value)}
-                  placeholder="Enter your spirit signature" 
-                  className="bg-black/60 border-primary/30 h-16 text-center text-2xl tracking-[0.4em] focus:border-primary rounded-none placeholder:opacity-10"
+                  placeholder="Enter spirit signature" 
+                  className="bg-black/60 border-primary/30 h-16 text-center text-2xl tracking-[0.4em] focus:border-primary rounded-none"
                 />
               </div>
 
               <div className="flex gap-4 p-4 bg-secondary/5 border-l-2 border-secondary/40 text-left">
                 <Info size={18} className="text-secondary shrink-0" />
                 <p className="text-xs text-muted-foreground italic leading-relaxed">
-                  The verified UTR is your proof of passage. Incorrect entries may stall your journey indefinitely.
+                  Passage is only granted to those who offer a true tribute. Incorrect IDs will stall your journey.
                 </p>
               </div>
             </CardContent>
@@ -177,7 +212,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ teamId, proverb }) =
               <Button 
                 onClick={handlePaymentSubmit}
                 disabled={isUpdating}
-                className="w-full h-24 bg-primary hover:bg-primary/90 text-black font-black text-2xl uppercase tracking-[0.5em] rounded-none shadow-gold-glow transition-all"
+                className="w-full h-24 bg-primary hover:bg-primary/90 text-black font-black text-2xl uppercase tracking-[0.5em] rounded-none transition-all"
               >
                 {isUpdating ? "SEALING RECORD..." : "CONFIRM PASSAGE"}
               </Button>

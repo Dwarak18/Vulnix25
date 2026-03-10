@@ -20,7 +20,11 @@
       "type": "object",
       "properties": {
         "teamName": { "type": "string" },
-        "eventSelection": { "type": "string" },
+        "events": { 
+          "type": "array", 
+          "items": { "type": "string" } 
+        },
+        "eventCount": { "type": "number" },
         "teamSize": { "type": "number" },
         "members": {
           "type": "array",
@@ -32,7 +36,7 @@
         "status": { "type": "string", "enum": ["pending", "verified"] },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["teamName", "eventSelection", "teamSize", "members", "teamId"]
+      "required": ["teamName", "events", "teamSize", "members", "teamId"]
     }
   },
   "auth": {
