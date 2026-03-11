@@ -3,8 +3,13 @@ import './globals.css';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 
 export const metadata: Metadata = {
-  title: 'VULNIX 2.0 | Celestial Myth Symposium',
+  title: 'VULNIX 2.0 | National Level Symposium 2026',
   description: 'A mythic gathering where cybersecurity and ancient legends collide. Face the trials of the Sage.',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
