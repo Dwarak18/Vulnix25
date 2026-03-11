@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -196,192 +195,194 @@ export const RegistrationForm: React.FC = () => {
     }
   };
 
-  if (submittedData) {
-    return <PaymentPanel registrationData={submittedData} />;
-  }
-
   return (
     <section id="registration" className="py-48 px-4 relative overflow-hidden bg-black/20">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-24">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            className="inline-block p-4 bg-primary/10 rounded-full mb-8 border border-primary/20"
-          >
-            <ScrollText className="text-primary" size={48} />
-          </motion.div>
-          <h2 className="text-5xl md:text-8xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">Temple of Records</h2>
-          <p className="text-muted-foreground text-xl italic font-body max-w-2xl mx-auto">
-            "Ink your name upon the immortal scroll and face your destiny. The Sage watches every stroke."
-          </p>
-          
-          <div className="mt-12 inline-flex items-center gap-6 px-10 py-6 ornate-border bg-primary/5 text-primary font-headline text-2xl tracking-[0.2em] shadow-gold-glow">
-            <Key className="animate-pulse" />
-            VESTIBULE KEY: {teamId}
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-16">
-          <Card className="stone-tablet border-primary/40 p-10 md:p-16 ornate-border overflow-visible">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div className="space-y-4">
-                <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
-                  <Flame size={14} className="text-secondary" />
-                  Team Moniker
-                </Label>
-                <div className="relative">
-                  <Input 
-                    {...register("teamName")} 
-                    className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider pl-4 rounded-none" 
-                    placeholder="e.g. Wukong's Shadow" 
-                  />
-                  <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
-                </div>
-                {errors.teamName && <p className="text-secondary text-sm italic">{errors.teamName.message}</p>}
-              </div>
-
-              <div className="space-y-4">
-                <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
-                  <Users size={14} className="text-secondary" />
-                  Disciple Count
-                </Label>
-                <Select value={teamSize} onValueChange={(v) => setValue("teamSize", v)}>
-                  <SelectTrigger className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider rounded-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card border-primary/40 font-headline">
-                    {["1", "2", "3", "4"].map(s => (
-                      <SelectItem key={s} value={s}>{s} Disciple{parseInt(s) > 1 ? 's' : ''}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        {submittedData ? (
+          <PaymentPanel registrationData={submittedData} />
+        ) : (
+          <>
+            <div className="text-center mb-24">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                className="inline-block p-4 bg-primary/10 rounded-full mb-8 border border-primary/20"
+              >
+                <ScrollText className="text-primary" size={48} />
+              </motion.div>
+              <h2 className="text-5xl md:text-8xl mb-8 text-primary font-headline tracking-tighter gold-glow-text">Temple of Records</h2>
+              <p className="text-muted-foreground text-xl italic font-body max-w-2xl mx-auto">
+                "Ink your name upon the immortal scroll and face your destiny. The Sage watches every stroke."
+              </p>
+              
+              <div className="mt-12 inline-flex items-center gap-6 px-10 py-6 ornate-border bg-primary/5 text-primary font-headline text-2xl tracking-[0.2em] shadow-gold-glow">
+                <Key className="animate-pulse" />
+                VESTIBULE KEY: {teamId}
               </div>
             </div>
 
-            <div className="mt-12 space-y-6">
-              <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
-                <Trophy size={14} className="text-secondary" />
-                Chosen Trials (Time Conflict Validation)
-              </Label>
-              <TooltipProvider>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {AVAILABLE_EVENTS.map((event) => {
-                    const isDisabled = conflictMap[event.id];
-                    const isChecked = selectedEventIds.includes(event.id);
-                    
-                    return (
-                      <Tooltip key={event.id}>
-                        <TooltipTrigger asChild>
-                          <div className={`flex items-center space-x-3 p-4 border transition-all duration-300 ${
-                            isDisabled 
-                              ? "opacity-40 bg-black/20 border-white/5 cursor-not-allowed" 
-                              : "bg-black/40 border-primary/10 hover:border-primary/40"
-                          }`}>
-                            <Checkbox 
-                              id={event.id}
-                              checked={isChecked}
-                              onCheckedChange={() => handleEventToggle(event.id)}
-                              disabled={!!isDisabled}
-                              className="border-primary"
-                            />
-                            <div className="flex flex-col flex-grow cursor-pointer" onClick={() => !isDisabled && handleEventToggle(event.id)}>
-                              <label 
-                                htmlFor={event.id}
-                                className={`text-sm font-body cursor-pointer select-none ${isDisabled ? 'text-muted-foreground' : 'text-foreground'}`}
-                              >
-                                {event.name}
-                              </label>
-                              <span className="text-[10px] text-primary/40 flex items-center gap-1">
-                                <Clock size={10} />
-                                {event.start} – {event.end}
-                              </span>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-16">
+              <Card className="stone-tablet border-primary/40 p-10 md:p-16 ornate-border overflow-visible">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                  <div className="space-y-4">
+                    <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
+                      <Flame size={14} className="text-secondary" />
+                      Team Moniker
+                    </Label>
+                    <div className="relative">
+                      <Input 
+                        {...register("teamName")} 
+                        className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider pl-4 rounded-none" 
+                        placeholder="e.g. Wukong's Shadow" 
+                      />
+                      <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/20" size={18} />
+                    </div>
+                    {errors.teamName && <p className="text-secondary text-sm italic">{errors.teamName.message}</p>}
+                  </div>
+
+                  <div className="space-y-4">
+                    <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
+                      <Users size={14} className="text-secondary" />
+                      Disciple Count
+                    </Label>
+                    <Select value={teamSize} onValueChange={(v) => setValue("teamSize", v)}>
+                      <SelectTrigger className="bg-black/60 border-primary/30 h-14 text-xl tracking-wider rounded-none">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-card border-primary/40 font-headline">
+                        {["1", "2", "3", "4"].map(s => (
+                          <SelectItem key={s} value={s}>{s} Disciple{parseInt(s) > 1 ? 's' : ''}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-12 space-y-6">
+                  <Label className="text-primary font-headline tracking-widest uppercase text-sm flex items-center gap-2">
+                    <Trophy size={14} className="text-secondary" />
+                    Chosen Trials (Time Conflict Validation)
+                  </Label>
+                  <TooltipProvider>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {AVAILABLE_EVENTS.map((event) => {
+                        const isDisabled = conflictMap[event.id];
+                        const isChecked = selectedEventIds.includes(event.id);
+                        
+                        return (
+                          <Tooltip key={event.id}>
+                            <TooltipTrigger asChild>
+                              <div className={`flex items-center space-x-3 p-4 border transition-all duration-300 ${
+                                isDisabled 
+                                  ? "opacity-40 bg-black/20 border-white/5 cursor-not-allowed" 
+                                  : "bg-black/40 border-primary/10 hover:border-primary/40"
+                              }`}>
+                                <Checkbox 
+                                  id={event.id}
+                                  checked={isChecked}
+                                  onCheckedChange={() => handleEventToggle(event.id)}
+                                  disabled={!!isDisabled}
+                                  className="border-primary"
+                                />
+                                <div className="flex flex-col flex-grow cursor-pointer" onClick={() => !isDisabled && handleEventToggle(event.id)}>
+                                  <label 
+                                    htmlFor={event.id}
+                                    className={`text-sm font-body cursor-pointer select-none ${isDisabled ? 'text-muted-foreground' : 'text-foreground'}`}
+                                  >
+                                    {event.name}
+                                  </label>
+                                  <span className="text-[10px] text-primary/40 flex items-center gap-1">
+                                    <Clock size={10} />
+                                    {event.start} – {event.end}
+                                  </span>
+                                </div>
+                              </div>
+                            </TooltipTrigger>
+                            {isDisabled && !isChecked && (
+                              <TooltipContent className="bg-secondary text-white border-none font-headline text-[10px] tracking-widest">
+                                <p>{isDisabled}</p>
+                              </TooltipContent>
+                            )}
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  </TooltipProvider>
+                  {errors.events && (
+                    <div className="flex items-center gap-2 text-secondary text-sm italic mt-2">
+                      <AlertCircle size={14} />
+                      {errors.events.message}
+                    </div>
+                  )}
+                </div>
+              </Card>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <AnimatePresence mode="popLayout">
+                  {fields.map((field, index) => (
+                    <motion.div
+                      key={field.id}
+                      layout
+                      initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                      transition={{ duration: 0.6, delay: (index % 2) * 0.1 }}
+                      className="w-full"
+                    >
+                      <Card className="stone-tablet border-accent/40 shadow-gold-glow overflow-hidden group">
+                        <CardHeader className="border-b border-accent/20 bg-primary/5 p-6 flex flex-row items-center justify-between">
+                          <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center text-sm font-headline bg-black/40">
+                              {index + 1}
+                            </div>
+                            Disciple {index + 1}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-8 pt-8 p-8">
+                          <div className="space-y-3">
+                            <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">True Name</Label>
+                            <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
+                            {errors.members?.[index]?.name && <p className="text-secondary text-xs">{errors.members[index].name?.message}</p>}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Phone</Label>
+                              <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
+                            </div>
+                            <div className="space-y-3">
+                              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Email</Label>
+                              <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
                             </div>
                           </div>
-                        </TooltipTrigger>
-                        {isDisabled && !isChecked && (
-                          <TooltipContent className="bg-secondary text-white border-none font-headline text-[10px] tracking-widest">
-                            <p>{isDisabled}</p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </TooltipProvider>
-              {errors.events && (
-                <div className="flex items-center gap-2 text-secondary text-sm italic mt-2">
-                  <AlertCircle size={14} />
-                  {errors.events.message}
-                </div>
-              )}
-            </div>
-          </Card>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">College</Label>
+                              <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
+                            </div>
+                            <div className="space-y-3">
+                              <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Department</Label>
+                              <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <AnimatePresence mode="popLayout">
-              {fields.map((field, index) => (
-                <motion.div
-                  key={field.id}
-                  layout
-                  initial={{ opacity: 0, y: 40, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  transition={{ duration: 0.6, delay: (index % 2) * 0.1 }}
-                  className="w-full"
+              <div className="text-center pt-24">
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="bg-primary hover:bg-primary/90 text-black font-black px-24 py-12 text-3xl ornate-border shadow-[0_0_60px_rgba(200,155,60,0.4)] rounded-none transition-all w-full md:w-auto"
                 >
-                  <Card className="stone-tablet border-accent/40 shadow-gold-glow overflow-hidden group">
-                    <CardHeader className="border-b border-accent/20 bg-primary/5 p-6 flex flex-row items-center justify-between">
-                      <CardTitle className="text-xl md:text-2xl text-primary font-headline tracking-widest flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full border border-primary/30 flex items-center justify-center text-sm font-headline bg-black/40">
-                          {index + 1}
-                        </div>
-                        Disciple {index + 1}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-8 pt-8 p-8">
-                      <div className="space-y-3">
-                        <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">True Name</Label>
-                        <Input {...register(`members.${index}.name`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
-                        {errors.members?.[index]?.name && <p className="text-secondary text-xs">{errors.members[index].name?.message}</p>}
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Phone</Label>
-                          <Input {...register(`members.${index}.phone`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
-                        </div>
-                        <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Email</Label>
-                          <Input {...register(`members.${index}.email`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">College</Label>
-                          <Input {...register(`members.${index}.college`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
-                        </div>
-                        <div className="space-y-3">
-                          <Label className="text-xs uppercase tracking-[0.2em] text-muted-foreground font-headline">Department</Label>
-                          <Input {...register(`members.${index}.department`)} className="bg-black/40 border-accent/30 h-12 rounded-none" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-
-          <div className="text-center pt-24">
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90 text-black font-black px-24 py-12 text-3xl ornate-border shadow-[0_0_60px_rgba(200,155,60,0.4)] rounded-none transition-all w-full md:w-auto"
-            >
-              {isSubmitting ? "ASCENDING..." : "SEAL THE SCROLL"}
-            </Button>
-          </div>
-        </form>
+                  {isSubmitting ? "ASCENDING..." : "SEAL THE SCROLL"}
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </section>
   );

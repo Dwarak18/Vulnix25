@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState } from 'react';
@@ -16,7 +15,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 import { motion } from 'framer-motion';
 
 // Replace this with your actual Google Apps Script Web App URL
-const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwjheo4AoikWU5Pig5x_AEVvvpV3P2N1z6k4Xicf0lJAkRj5GkGlnJUAGlQUoWwLAlj/exec";
+const GOOGLE_SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGFMnfFIJMcQm2GFlAWKR5Fd5XwkY1JHmEFOP6-bwijDiMOG102hd6ZOCForUzNjYj/exec";
 
 interface PaymentPanelProps {
   registrationData: any;
@@ -51,14 +50,11 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
     const docRef = doc(db, 'registrations', teamId);
     setDoc(docRef, finalData)
       .catch(async (serverError) => {
-        // Create the rich, contextual error asynchronously.
         const permissionError = new FirestorePermissionError({
           path: docRef.path,
           operation: 'create',
           requestResourceData: finalData,
         });
-
-        // Emit the error with the global error emitter
         errorEmitter.emit('permission-error', permissionError);
       });
 
@@ -82,18 +78,25 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
     });
 
     // Step 3: Immediate UI Success
-    // We don't await the above calls so the UI feels instant and doesn't get stuck on network/CORS issues
     setCompleted(true);
     setIsUpdating(false);
     toast({ 
       title: "Tribute Accepted", 
       description: "Your verification is underway. Patience is the root of wisdom." 
     });
+
+    // Auto scroll to the ending title card after a short delay
+    setTimeout(() => {
+      const endingScene = document.getElementById('ending-scene');
+      if (endingScene) {
+        endingScene.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 1500);
   };
 
   if (completed) {
     return (
-      <div className="py-48 px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-700">
+      <div className="px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-700">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -120,7 +123,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
   }
 
   return (
-    <div className="py-32 px-4 max-w-5xl mx-auto">
+    <div className="px-4 max-w-5xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
@@ -172,7 +175,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000"></div>
                 <div className="relative bg-white p-6 inline-block rounded-lg shadow-2xl">
                   <Image 
-                     src="/img/upi-qr.png"
+                     src="/img/payment.png"
                      alt="VULNIX UPI QR"
                      width={250}
                      height={250}

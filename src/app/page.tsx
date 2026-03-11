@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect } from 'react';
@@ -87,7 +86,7 @@ export default function Home() {
       {(showRegistration || isTransitioning) && <RegistrationForm />}
 
       {/* Ending Scene */}
-      <section className="relative py-64 overflow-hidden flex flex-col items-center justify-center text-center">
+      <section id="ending-scene" className="relative py-64 overflow-hidden flex flex-col items-center justify-center text-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
