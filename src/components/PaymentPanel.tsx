@@ -136,7 +136,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000" />
                 <div className="relative bg-white p-4 md:p-6 inline-block rounded-lg shadow-2xl">
                   <Image
-                    src="https://picsum.photos/seed/payment/220/220"
+                    src="/img/payment.png"
                     alt="VULNIX UPI QR"
                     width={220}
                     height={220}
