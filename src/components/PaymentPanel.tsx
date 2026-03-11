@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { CheckCircle2, Sparkles, ShieldCheck, Info, CreditCard } from 'lucide-react';
-import Image from 'image'; // Using standard next/image would be better, but keeping consistency
+import Image from 'next/image';
 import { useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -62,7 +62,9 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
       transactionID: txnId
     };
 
-    // Google Sheets sync in background
+    console.log("Sending registration to Google Sheets:", sheetPayload);
+
+    // Google Sheets sync in background - Google Apps Script compatible version
     fetch(GOOGLE_SHEETS_WEB_APP_URL, {
       method: "POST",
       mode: "no-cors",
@@ -133,8 +135,13 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
               <div className="relative group mx-auto">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000" />
                 <div className="relative bg-white p-4 md:p-6 inline-block rounded-lg shadow-2xl">
-                  {/* Note: In a real project you'd use a real QR code or next/image */}
-                  <div className="w-[200px] h-[200px] md:w-[220px] md:h-[220px] mx-auto bg-gray-200 flex items-center justify-center text-black text-xs">UPI QR PLACEHOLDER</div>
+                  <Image
+                    src="https://picsum.photos/seed/payment/220/220"
+                    alt="VULNIX UPI QR"
+                    width={220}
+                    height={220}
+                    className="mx-auto"
+                  />
                 </div>
               </div>
               <p className="text-muted-foreground uppercase tracking-[0.2em] md:tracking-[0.3em] text-[10px] md:text-xs">Scan the QR code and complete the payment.</p>
