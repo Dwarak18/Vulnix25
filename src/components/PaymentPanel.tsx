@@ -44,6 +44,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
     const teamId = registrationData.teamId;
     const finalData = { ...registrationData, txnId, status: 'pending', createdAt: serverTimestamp() };
 
+    // Optimistic Update: Initiate background writes and transitions immediately
     const docRef = doc(db, 'registrations', teamId);
     setDoc(docRef, finalData)
       .catch(async () => {
@@ -61,6 +62,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
       transactionID: txnId
     };
 
+    // Google Sheets sync in background
     fetch(GOOGLE_SHEETS_WEB_APP_URL, {
       method: "POST",
       mode: "no-cors",
