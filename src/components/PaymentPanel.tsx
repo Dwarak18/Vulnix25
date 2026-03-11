@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,9 +23,17 @@ interface PaymentPanelProps {
 
 export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) => {
   const db = useFirestore();
+  const panelRef = useRef<HTMLDivElement>(null);
   const [txnId, setTxnId] = useState('');
   const [completed, setCompleted] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  useEffect(() => {
+    panelRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }, []);
 
   const handlePaymentSubmit = () => {
     if (!txnId || txnId.trim().length < 6) {
@@ -96,7 +104,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
 
   if (completed) {
     return (
-      <div className="px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-700">
+      <div ref={panelRef} className="px-4 max-w-2xl mx-auto text-center animate-in zoom-in duration-700">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -123,7 +131,7 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
   }
 
   return (
-    <div className="px-4 max-w-5xl mx-auto">
+    <div ref={panelRef} className="px-4 max-w-5xl mx-auto">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
