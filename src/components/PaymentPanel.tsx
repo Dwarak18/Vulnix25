@@ -132,7 +132,13 @@ export const PaymentPanel: React.FC<PaymentPanelProps> = ({ registrationData }) 
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg blur opacity-40 group-hover:opacity-100 transition duration-1000" />
                 <div className="relative bg-white p-6 inline-block rounded-lg shadow-2xl">
-                  <Image src="https://picsum.photos/seed/payment/250/250" alt="VULNIX UPI QR" width={250} height={250} className="mx-auto" data-ai-hint="QR code" />
+                  <Image 
+                    src="/img/payment.png"
+                    alt="VULNIX UPI QR"
+                    width={250}
+                    height={250}
+                    className="mx-auto" 
+                    />
                 </div>
               </div>
               <p className="text-muted-foreground uppercase tracking-[0.3em] text-xs">Scan the QR code and complete the payment.</p>
