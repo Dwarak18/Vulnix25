@@ -27,18 +27,15 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     isPausedRef.current = isPaused;
   }, [isPaused]);
 
-  // Helper to create high-detail procedural textures for metal and lacquer
   const createOrnateTexture = (color: string, isGold: boolean) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 1024;
     const ctx = canvas.getContext('2d');
     if (ctx) {
-      // Base color
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, 1024, 1024);
       
-      // Add "dragon scale" or "cloud" pattern for gold sections
       if (isGold) {
         ctx.strokeStyle = '#8c6b2e';
         ctx.lineWidth = 1;
@@ -48,7 +45,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
           ctx.arc(Math.random() * 1024, Math.random() * 1024, Math.random() * 200, 0, Math.PI * 2);
           ctx.stroke();
         }
-        // Add "engravings"
         ctx.globalAlpha = 0.4;
         ctx.font = 'bold 80px serif';
         ctx.fillStyle = '#5a451e';
@@ -56,7 +52,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
           ctx.fillText('龍', Math.random() * 1024, Math.random() * 1024);
         }
       } else {
-        // Lacquer details
         ctx.strokeStyle = '#4a0000';
         ctx.lineWidth = 0.5;
         ctx.globalAlpha = 0.1;
@@ -68,7 +63,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
         }
       }
       
-      // Add surface wear/scratches
       ctx.globalAlpha = 0.15;
       ctx.strokeStyle = '#ffffff';
       for (let i = 0; i < 100; i++) {
@@ -89,7 +83,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
   const createLegendStaff = (scene: THREE.Scene) => {
     const group = new THREE.Group();
     
-    // High-fidelity Materials with PBR properties
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xc89b3c,
       metalness: 1.0,
@@ -121,12 +114,10 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       opacity: 1
     });
 
-    // 1. Main Polished Gold Shaft
     const mainShaftGeo = new THREE.CylinderGeometry(0.12, 0.12, 6.8, 64);
     const mainShaft = new THREE.Mesh(mainShaftGeo, goldMat);
     group.add(mainShaft);
 
-    // 2. Deep Red Lacquer Bands (Segmented for detail)
     const bandHeight = 1.4;
     const bandGeo = new THREE.CylinderGeometry(0.135, 0.135, bandHeight, 64);
     
@@ -138,7 +129,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     bottomBand.position.y = -1.9;
     group.add(bottomBand);
 
-    // 3. Detailed Gold Caps with Engravings
     const capGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.9, 64);
     const topCap = new THREE.Mesh(capGeo, goldMat);
     topCap.position.y = 3.85;
@@ -148,7 +138,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     bottomCap.position.y = -3.85;
     group.add(bottomCap);
 
-    // 4. Ornamental Rings (Infinity/Cloud style)
     const ringGeo = new THREE.TorusGeometry(0.16, 0.03, 16, 100);
     const ringPositions = [2.6, 1.2, 0, -1.2, -2.6, 3.4, -3.4];
     ringPositions.forEach(y => {
@@ -158,7 +147,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       group.add(ring);
     });
 
-    // 5. Final Reinforced Tips
     const tipGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.2, 64);
     const topTip = new THREE.Mesh(tipGeo, glowingGoldMat);
     topTip.position.y = 4.3;
@@ -204,26 +192,17 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
 
-    // Cinematic Lighting Rig
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
     scene.add(ambientLight);
 
-    // Key Light (Warm Gold)
     const keyLight = new THREE.DirectionalLight(0xffaa00, 1.2);
     keyLight.position.set(5, 5, 5);
     scene.add(keyLight);
 
-    // Fill Light
-    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
-    fillLight.position.set(-5, 0, 5);
-    scene.add(fillLight);
-
-    // Rim Light (Vibrant Red)
     const rimLight = new THREE.DirectionalLight(0xd7263d, 1.5);
     rimLight.position.set(0, 5, -10);
     scene.add(rimLight);
 
-    // Central Glowing Point Light
     const goldenPointLight = new THREE.PointLight(0xffaa00, 50, 15);
     goldenPointLight.position.set(0, 0, 2);
     scene.add(goldenPointLight);
@@ -231,7 +210,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
 
     createLegendStaff(scene);
 
-    // Particle System 1: Golden Sparks
     const sparkCount = isMobile ? 100 : 300;
     const sparkGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(sparkCount * 3);
@@ -252,7 +230,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
     ambientSparksRef.current = ambientSparks;
     scene.add(ambientSparks);
 
-    // Particle System 2: Energy Spiral Burst
     const burstCount = 100;
     const burstGeo = new THREE.BufferGeometry();
     const bPos = new Float32Array(burstCount * 3);
@@ -287,7 +264,6 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       const time = clock.getElapsedTime();
       const scrollY = scrollRef.current;
 
-      // Staff Fading Logic: Fade out as user scrolls towards the main title reveal (400px - 900px)
       const fadeStart = 400;
       const fadeEnd = 900;
       const staffFadeFactor = Math.max(0, 1 - (scrollY - fadeStart) / (fadeEnd - fadeStart));
@@ -302,13 +278,11 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
           }
         });
         
-        // Aesthetic staff motion
         modelRef.current.position.y = Math.sin(time * 0.5) * 0.3 - (scrollY * 0.001);
         modelRef.current.rotation.y += 0.006;
-        modelRef.current.rotation.z = Math.sin(time * 0.3) * 0.05; // Tilt oscillation
+        modelRef.current.rotation.z = Math.sin(time * 0.3) * 0.05;
       }
 
-      // Cinematic Camera Orbit
       const orbitSpeed = 0.15;
       const orbitRadius = (isMobile ? 11 : 9) + (scrollY * 0.001);
       camera.position.x = Math.sin(time * orbitSpeed) * 0.5;
@@ -316,23 +290,20 @@ export const ThreeScene: React.FC<ThreeSceneProps> = ({ isPaused = false }) => {
       camera.position.y = -1 + Math.sin(time * 0.4) * 0.3 - (scrollY * 0.002);
       camera.lookAt(0, 0, 0);
 
-      // Flickering & Pulsing Center Light
       if (goldenLightRef.current) {
         goldenLightRef.current.intensity = (45 + Math.sin(time * 6) * 15) * staffFadeFactor;
       }
 
-      // Ambient Spark Drift
       if (ambientSparksRef.current) {
         const pPosArr = ambientSparksRef.current.geometry.attributes.position.array as Float32Array;
         for (let i = 0; i < sparkCount; i++) {
-          pPosArr[i * 3 + 1] += 0.015; // Float upwards
-          pPosArr[i * 3] += Math.sin(time * 0.5 + i) * 0.008; // Drifting
+          pPosArr[i * 3 + 1] += 0.015;
+          pPosArr[i * 3] += Math.sin(time * 0.5 + i) * 0.008;
           if (pPosArr[i * 3 + 1] > 10) pPosArr[i * 3 + 1] = -10;
         }
         ambientSparksRef.current.geometry.attributes.position.needsUpdate = true;
       }
 
-      // Energy Spiral / Burst animation
       if (centerBurstRef.current) {
         centerBurstRef.current.rotation.y -= 0.02;
         const bPosArr = centerBurstRef.current.geometry.attributes.position.array as Float32Array;

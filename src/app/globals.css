@@ -34,7 +34,7 @@
   body {
     @apply bg-background text-foreground selection:bg-primary selection:text-background font-body antialiased overflow-x-hidden;
     background-image: 
-      radial-gradient(circle at 50% 40%, rgba(245, 189, 66, 0.06) 0%, transparent 70%),
+      radial-gradient(circle at 50% 40%, rgba(245, 189, 66, 0.08) 0%, transparent 70%),
       linear-gradient(to bottom, #0a0a0a, #050505);
     background-attachment: fixed;
   }
@@ -51,8 +51,8 @@
     0 2px 0 #947226,
     0 3px 0 #755a1e,
     0 4px 0 #564216,
-    0 0 30px rgba(245, 189, 66, 0.6);
-  filter: drop-shadow(0 0 12px rgba(245, 189, 66, 0.3));
+    0 0 30px rgba(245, 189, 66, 0.8);
+  filter: drop-shadow(0 0 15px rgba(245, 189, 66, 0.4));
 }
 
 .mythic-bevel-red {
@@ -62,8 +62,8 @@
     0 2px 0 #8a1727,
     0 3px 0 #711320,
     0 4px 0 #580e19,
-    0 0 25px rgba(215, 38, 61, 0.5);
-  filter: drop-shadow(0 0 10px rgba(215, 38, 61, 0.3));
+    0 0 25px rgba(215, 38, 61, 0.7);
+  filter: drop-shadow(0 0 12px rgba(215, 38, 61, 0.4));
 }
 
 /* Mythological Components */
@@ -78,7 +78,7 @@
 .parchment-texture {
   background-color: #221a12;
   background-image: 
-    radial-gradient(circle at 50% 50%, rgba(255, 240, 200, 0.03) 0%, rgba(0,0,0,0.6) 100%),
+    radial-gradient(circle at 50% 50%, rgba(255, 240, 200, 0.05) 0%, rgba(0,0,0,0.7) 100%),
     url("https://www.transparenttextures.com/patterns/paper-fibers.png");
   position: relative;
   box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.9);
@@ -94,10 +94,10 @@
 
 .scroll-roller {
   background: linear-gradient(to bottom, #2a1d0f 0%, #8c6b2e 50%, #2a1d0f 100%);
-  border: 1px solid rgba(245, 189, 66, 0.2);
+  border: 1px solid rgba(245, 189, 66, 0.3);
   box-shadow: 
-    0 4px 8px rgba(0,0,0,0.6),
-    inset 0 1px 1px rgba(255,255,255,0.1);
+    0 6px 12px rgba(0,0,0,0.7),
+    inset 0 1px 1px rgba(255,255,255,0.15);
 }
 
 .ornate-border {
@@ -139,11 +139,11 @@
 
 .gold-glow-text {
   color: hsl(var(--primary));
-  text-shadow: 0 0 25px rgba(245, 189, 66, 0.7);
+  text-shadow: 0 0 35px rgba(245, 189, 66, 0.8);
 }
 
 .shadow-gold-glow {
-  box-shadow: 0 0 40px rgba(245, 189, 66, 0.25);
+  box-shadow: 0 0 45px rgba(245, 189, 66, 0.3);
 }
 
 .temple-silhouette {

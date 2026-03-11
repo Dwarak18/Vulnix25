@@ -100,7 +100,6 @@ const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string,
 
       {/* Parchment Body */}
       <div className="w-[96%] parchment-texture border-x-8 border-accent/30 overflow-hidden shadow-2xl transition-all duration-700 group-hover:shadow-[0_0_40px_rgba(200,155,60,0.15)] group-hover:brightness-110 relative">
-        {/* Parallax Background Texture */}
         <motion.div 
           className="absolute inset-0 opacity-20 pointer-events-none"
           style={{ 
@@ -163,7 +162,6 @@ const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string,
           </p>
         </div>
         
-        {/* Subtle Watermark Icon overlay */}
         <div className="absolute bottom-6 right-6 opacity-5 group-hover:opacity-15 transition-opacity pointer-events-none scale-150">
           {icon}
         </div>
@@ -176,7 +174,6 @@ const ScrollCard = ({ title, desc, icon, color }: { title: string, desc: string,
         <div className="w-4 h-4 rounded-full bg-black/60 border border-primary/40 shadow-inner" />
       </div>
 
-      {/* Outer Glow on Hover */}
       <div className="absolute -inset-4 bg-primary/5 rounded-xl blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10" />
     </motion.div>
   );
