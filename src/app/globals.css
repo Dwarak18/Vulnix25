@@ -43,6 +43,16 @@
   }
 }
 
+/* Logo Stylization */
+.vulnix-x {
+  color: #ffd54a;
+  text-shadow: 0 0 8px rgba(255, 210, 80, 0.8), 0 0 20px rgba(255, 200, 60, 0.6);
+  margin-left: 0.15em;
+  margin-right: 0.15em;
+  display: inline-block;
+  filter: brightness(1.2);
+}
+
 /* Mythological Bevel Typography */
 .mythic-bevel-gold {
   color: hsl(var(--primary));

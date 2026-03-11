@@ -5,7 +5,7 @@ import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion';
 import { ThreeScene } from '@/components/ThreeScene';
 import { BackgroundRunes } from '@/components/BackgroundRunes';
 import { Toaster } from '@/components/ui/toaster';
-import { Clock, Sword, Flame, Scroll, Sparkles, Trophy, BookOpen, Coffee, Utensils, Zap, MousePointer2 } from 'lucide-react';
+import { Clock, Sword, Flame, Scroll, Sparkles, Trophy, BookOpen, Coffee, Utensils, Zap, Instagram, Linkedin, Mail } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const SCHEDULE_DATA = [
@@ -277,7 +277,9 @@ export default function SchedulePage() {
       <BackgroundRunes isPaused={false} />
 
       <nav className="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center bg-gradient-to-b from-black to-transparent pointer-events-none">
-        <a href="/" className="text-2xl font-black text-primary hover:scale-105 transition-transform pointer-events-auto">VULNIX 2.0</a>
+        <a href="/" className="text-2xl font-black text-primary hover:scale-105 transition-transform pointer-events-auto flex items-center">
+          VULNI<span className="vulnix-x">X</span> 2.0
+        </a>
         <div className="flex gap-8 text-xs font-headline tracking-widest text-primary/70 pointer-events-auto">
           <a href="/" className="hover:text-primary transition-colors">BACK TO SANCTUARY</a>
         </div>
@@ -344,9 +346,37 @@ export default function SchedulePage() {
         </motion.div>
       </section>
 
-      <footer className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20">
-        <div className="max-w-4xl mx-auto px-4">
-          <p>© VULNIX 2.0 SYMPOSIUM — POWERED BY THE ANCIENT SPIRIT OF INNOVATION</p>
+      <footer className="py-12 text-center text-muted-foreground text-[10px] sm:text-xs uppercase tracking-widest border-t border-primary/10 bg-black/95 relative z-20 px-4">
+        <div className="max-w-screen-xl mx-auto">
+          <p className="mb-6">© VULNIX 2.0 SYMPOSIUM — POWERED BY THE ANCIENT SPIRIT OF INNOVATION</p>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-12 mt-8">
+            <a 
+              href="https://www.instagram.com/_cyzor_?igsh=MWU3ZWczZWQxbHVicA==" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-primary/40 hover:text-primary cursor-pointer transition-colors flex items-center gap-2"
+            >
+              <Instagram size={14} /> INSTAGRAM
+            </a>
+            <a 
+              href="https://www.linkedin.com/in/3105-149cybersecurity?utm_source=share_via&utm_content=profile&utm_medium=member_android" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-primary/40 hover:text-primary cursor-pointer transition-colors flex items-center gap-2"
+            >
+              <Linkedin size={14} /> LINKEDIN
+            </a>
+            <a 
+              href="mailto:cyberevents@dscet.ac.in" 
+              className="text-primary/40 hover:text-primary cursor-pointer transition-colors flex items-center gap-2"
+            >
+              <Mail size={14} /> cyberevents@dscet.ac.in
+            </a>
+          </div>
+          
+          <p className="text-[10px] text-primary/60 tracking-[0.3em] italic mt-16 text-center uppercase">
+            Forged by the Architects of VULNIX — Dwarak × Kumaran
+          </p>
         </div>
       </footer>
 
