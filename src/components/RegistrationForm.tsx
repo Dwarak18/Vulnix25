@@ -33,7 +33,7 @@ const AVAILABLE_EVENTS: EventTrial[] = [
   { id: "web", name: "Website Prompt Challenge", start: "11:45", end: "12:30" },
   { id: "debugging", name: "Debugging Challenge", start: "12:30", end: "13:15" },
   { id: "song", name: "Guess The Song", start: "12:30", end: "13:15" },
-  { id: "strategy", name: "Chess / Carrom / Ludo", start: "11:45", end: "13:15" },
+  { id: "strategy", name: "Chess / Carrom / Meme Creation", start: "11:45", end: "13:15" },
   { id: "ctf", name: "Capture The Flag (CTF)", start: "09:00", end: "14:00" }
 ];
 

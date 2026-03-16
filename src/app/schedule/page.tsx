@@ -51,7 +51,7 @@ const SCHEDULE_DATA = [
     icon: <Zap size={20} />,
     events: [
       { title: "Web Weaver Trial", subtitle: "Website Prompt Engineering" },
-      { title: "Trial of Strategy", subtitle: "Chess, Carrom & Ludo Arena", isCreative: true }
+      { title: "Trial of Strategy", subtitle: "Chess, Carrom & Meme Creation Arena", isCreative: true }
     ] 
   },
   { 
@@ -60,7 +60,7 @@ const SCHEDULE_DATA = [
     events: [
       { title: "Spirit Debugging", subtitle: "Shadow Debugging Trial" },
       { title: "Musical Trivia", subtitle: "Guess the Song Challenge", isCreative: true },
-      { title: "Strategy Continued", subtitle: "Board Game Finals", isCreative: true }
+      { title: "Strategy Continued", subtitle: "Strategy & Creative Finals", isCreative: true }
     ] 
   },
   { 

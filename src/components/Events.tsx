@@ -64,7 +64,7 @@ const NON_TECH_EVENTS = [
   },
   {
     title: "Trial of Strategy",
-    desc: "Ancient board games: Chess, Carrom, and Ludo. Test your tactical mind.",
+    desc: "Ancient board games and sharp wit: Chess, Carrom, and Meme Creation.",
     icon: <Dice5 size={28} />,
     color: "secondary"
   }
